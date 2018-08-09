@@ -105,15 +105,13 @@
 (define (rfc-splash)
   (rfc-frame)
 
-  (attron (COLOR_PAIR 4))
-  (centre-message "You are the Robot!" "Find the Chicken!" "Godspeed!")
-  (attroff (COLOR_PAIR 4))
-
   (attron (COLOR_PAIR 6))
   (mvprintw (- (LINES) 2) (- (COLS) 18) "Press Q to exit.")
   (mvprintw (- (LINES) 3) 2 "Use       to move.")
+  (mvprintw 3 (- (COLS) 44) "Press H any time to view this help screen.")
+  (mvprintw 3 3 "Press any key to begin/resume.")
   (attroff (COLOR_PAIR 6))
-
+  
   (attron (COLOR_PAIR 5))
   (mvprintw (- (LINES) 4) 6 "7 8 9")
   (mvprintw (- (LINES) 3) 6 "4   6")
@@ -121,8 +119,18 @@
   (attroff (COLOR_PAIR 5))
 
   (attron (COLOR_PAIR 4))
+  (centre-message "You are the Robot!" "Find the Chicken!" "Godspeed!")
   (mvaddch (- (LINES) 3) 8 (ACS_PLUS))
-  (attroff (COLOR_PAIR 4)))
+  (attroff (COLOR_PAIR 4))
+    
+  (if (member (getch) '(#\q #\Q KEY_F0))
+      (quit "That was quick." 0))
+  
+  (clear)
+
+  (rfc-frame)
+  (draw-robot)
+  (draw-chicken))
 
 (define (rfc-init)
   (initscr)
@@ -145,22 +153,15 @@
 
   (attron A_BOLD)
 
-  (rfc-splash)
-  
-  (if (member (getch) '(#\q #\Q KEY_F0))
-      (quit "That was quick." 0))
-
   (robot-row (random-row))
   (robot-col (random-col))
   (robot-row-prev (robot-row))
   (robot-col-prev (robot-col))
   (chicken-row (random-row))
   (chicken-col (random-col))
+  
+  (rfc-splash)
 
-  (clear)
-  (rfc-frame)
-  (draw-robot)
-  (draw-chicken)
   (rfc-loop))
 
 (define (rfc-loop)
@@ -187,7 +188,9 @@
      (move h: 'left))
     ((#\7)
      (move v: 'up
-           h: 'left)))
+           h: 'left))
+    ((#\h #\H KEY_F1 KEY_HELP)
+     (call-with-current-continuation (lambda _ (rfc-splash)))))
 
   (rfc-loop))
 
@@ -218,7 +221,7 @@
   (attroff (COLOR_PAIR 4))
 
   (refresh)
-  (thread-sleep! 2)
+  (thread-sleep! 1)
   (getch)
   (quit "Thanks for playing!" 0))
 
