@@ -1,7 +1,7 @@
 #!/usr/bin/csi -ss
 (use ncurses)
-(use posix)
 (require-extension srfi-13)
+(require-extension srfi-18)
 
 (define robot-row (make-parameter 1))
 (define robot-col (make-parameter 1))
@@ -33,10 +33,17 @@
       (centre-message-iter (cdr messages) (add1 n))))
   (centre-message-iter messages 0))
 
+(define (repeat f n)
+  (if (= n 1)
+      (f)
+      ((lambda ()
+         (f)
+         (repeat f (sub1 n))))))
+
 (define (random-row)
-  (add1 (random (- (LINES) 2))))
+  (+ 3 (random (- (LINES) 5))))
 (define (random-col)
-  (add1 (random (- (COLS) 2))))
+  (+ 1 (random (- (COLS) 2))))
 
 (define (draw-chicken)
   (attron (COLOR_PAIR 3))
@@ -53,6 +60,7 @@
 (define (move #!key (v 'nil) (h 'nil))
   (robot-row-prev (robot-row))
   (robot-col-prev (robot-col))
+
   (if (eq? v 'up)
       (robot-row (sub1 (robot-row)))
       (if (eq? v 'down)
@@ -61,18 +69,21 @@
       (robot-col (sub1 (robot-col)))
       (if (eq? h 'right)
           (robot-col (add1 (robot-col)))))
-  (cond
-   ((> (robot-row) (- (LINES) 2))
-    (robot-row (- (LINES) 2)))
-   ((> (robot-col) (- (COLS) 3))
-    (robot-col (- (COLS) 3)))
-   ((< (robot-row) 1)
-    (robot-row 1))
-   ((< (robot-col) 1)
-    (robot-col 1))
-   ((and (= (chicken-col) (robot-col))
-         (= (chicken-row) (robot-row)))
-    (rfc-win)))
+
+  (if (= (robot-row) (- (LINES) 1))
+      (robot-row (- (LINES) 2))
+      (if (= (robot-row) 2)
+          (robot-row 3)))
+
+  (if (= (robot-col) (- (COLS) 1))
+      (robot-col (- (COLS) 2))
+      (if (= (robot-col) 0)
+          (robot-col 1)))
+
+  (if (and (= (chicken-col) (robot-col))
+           (= (chicken-row) (robot-row)))
+      (rfc-win))
+
   (moved? #t))
 
 (define (rfc-frame)
@@ -82,9 +93,11 @@
   (mvaddch 2 0 (ACS_LTEE))
   (mvaddch 2 (sub1 (COLS)) (ACS_RTEE))
   (attroff (COLOR_PAIR 1))
+
   (attron (COLOR_PAIR 2))
   (mvprintw 2 2 "robotfinds")
   (attroff (COLOR_PAIR 2))
+
   (attron (COLOR_PAIR 3))
   (printw "chicken")
   (attroff (COLOR_PAIR 3)))
@@ -180,12 +193,32 @@
 
 (define (rfc-win)
   (clear)
+  (flushinp)
   (rfc-frame)
+
+  (robot-row 1)
+  (robot-col (- (quotient (COLS) 2) 3))
+  
+  (chicken-row 1)
+  (chicken-col (+ (quotient (COLS) 2) 3))
+
+  (draw-robot)
+  (draw-chicken)
+
+  (repeat
+   (lambda ()
+     (thread-sleep! 0.8)
+     (move h: 'right)
+     (draw-robot)
+     (refresh))
+   5)
+  
   (attron (COLOR_PAIR 4))
   (centre-message "You found the chicken!" "Bravo!")
   (attroff (COLOR_PAIR 4))
+
   (refresh)
-  (sleep 3)
+  (thread-sleep! 2)
   (getch)
   (quit "Thanks for playing!" 0))
 
