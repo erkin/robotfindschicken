@@ -108,7 +108,6 @@
   (attron (COLOR_PAIR 6))
   (mvprintw (- (LINES) 2) (- (COLS) 18) "Press Q to exit.")
   (mvprintw (- (LINES) 3) 2 "Use       to move.")
-  (mvprintw 3 (- (COLS) 44) "Press H any time to view this help screen.")
   (mvprintw 3 3 "Press any key to begin/resume.")
   (attroff (COLOR_PAIR 6))
   
@@ -162,6 +161,7 @@
   
   (rfc-splash)
 
+  (mvprintw 1 (- (COLS) 32) "Press H any time to view help.")
   (rfc-loop))
 
 (define (rfc-loop)
@@ -190,7 +190,7 @@
      (move v: 'up
            h: 'left))
     ((#\h #\H KEY_F1 KEY_HELP)
-     (call-with-current-continuation (lambda _ (rfc-splash)))))
+     (rfc-splash)))
 
   (rfc-loop))
 
@@ -200,7 +200,7 @@
   (rfc-frame)
 
   (robot-row 1)
-  (robot-col (- (quotient (COLS) 2) 3))
+  (robot-col (- (quotient (COLS) 2) 4))
   
   (chicken-row 1)
   (chicken-col (+ (quotient (COLS) 2) 3))
@@ -214,7 +214,7 @@
      (move h: 'right)
      (draw-robot)
      (refresh))
-   5)
+   6)
   
   (attron (COLOR_PAIR 4))
   (centre-message "You found the chicken!" "Bravo!")
