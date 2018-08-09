@@ -15,7 +15,8 @@
 (define chicken-col (make-parameter 1))
 
 (define (quit message code)
-  (flushinp)
+  (flushinp) ; Stop input to avoid cluttering the terminal
+  (attroff (A_BOLD))
   (clear)
   (endwin)
   (unless (zero? code)
@@ -24,8 +25,8 @@
   (print message)
   (exit))
 
-(define (centre-message . messages)
-  (define (centre-message-iter messages n)
+(define (centre-message . messages) ; Write messages in the middle of the window
+  (define (centre-message-iter messages n) ; with doublespacing
     (when (pair? messages)
       (mvprintw (+ (quotient (LINES) 2) (- n (length messages)))
                 (quotient (- (COLS) (string-length (car messages))) 2)
@@ -33,7 +34,7 @@
       (centre-message-iter (cdr messages) (add1 n))))
   (centre-message-iter messages 0))
 
-(define (repeat f n)
+(define (repeat f n) ; run the procedure f n times
   (if (= n 1)
       (f)
       ((lambda ()
@@ -51,39 +52,42 @@
   (attroff (COLOR_PAIR 3)))
 
 (define (draw-robot)
-  (mvaddch (robot-row-prev) (robot-col-prev) #\ )
+  (mvaddch (robot-row-prev) (robot-col-prev) #\ ) ; remove the previous robot
   (attron (COLOR_PAIR 7))
   (mvaddch (robot-row) (robot-col) (ACS_DIAMOND))
   (attroff (COLOR_PAIR 7))
   (moved? #f))
 
-(define (move #!key (v 'nil) (h 'nil))
+(define (move-robot #!key (v 'nil) (h 'nil))
   (robot-row-prev (robot-row))
   (robot-col-prev (robot-col))
 
-  (if (eq? v 'up)
+  (if (eq? v 'up) ; Vertical movement
       (robot-row (sub1 (robot-row)))
       (if (eq? v 'down)
           (robot-row (add1 (robot-row)))))
-  (if (eq? h 'left)
+
+  (if (eq? h 'left) ; Horizontal movement
       (robot-col (sub1 (robot-col)))
       (if (eq? h 'right)
           (robot-col (add1 (robot-col)))))
 
-  (if (= (robot-row) (- (LINES) 1))
+  (if (= (robot-row) (- (LINES) 1)) ; Vertical boundary check
       (robot-row (- (LINES) 2))
       (if (= (robot-row) 2)
           (robot-row 3)))
 
-  (if (= (robot-col) (- (COLS) 1))
+  (if (= (robot-col) (- (COLS) 1)) ; Horizontal boundary check
       (robot-col (- (COLS) 2))
       (if (= (robot-col) 0)
           (robot-col 1)))
 
-  (if (and (= (chicken-col) (robot-col))
+  (if (and (= (chicken-col) (robot-col)) ; You found chicken!
            (= (chicken-row) (robot-row)))
       (rfc-win))
 
+  ;; We did something to merit redrawing.
+  ;; Even if it's just bumping against the wall.
   (moved? #t))
 
 (define (rfc-frame)
@@ -104,6 +108,8 @@
 
 (define (rfc-splash)
   (rfc-frame)
+  ;; The ordering is important to avoid rewriting
+  ;; some parts with spaces.
 
   (attron (COLOR_PAIR 6))
   (mvprintw (- (LINES) 2) (- (COLS) 18) "Press Q to exit.")
@@ -122,12 +128,12 @@
   (mvaddch (- (LINES) 3) 8 (ACS_PLUS))
   (attroff (COLOR_PAIR 4))
     
-  (if (member (getch) '(#\q #\Q KEY_F0))
-      (quit "That was quick." 0))
-  
-  (clear)
+  (if (member (getch) '(#\q #\Q KEY_F0)) ; Mock the player for
+      (quit "That was quick." 0)) ; exiting on help screen.
 
-  (rfc-frame)
+  (clear) ; Now that the player pressed a key, clear the screen
+
+  (rfc-frame) ; And redraw the game elements
   (draw-robot)
   (draw-chicken))
 
@@ -152,43 +158,53 @@
 
   (attron A_BOLD)
 
-  (robot-row (random-row))
+  (robot-row (random-row)) ; Random initial positions
   (robot-col (random-col))
   (robot-row-prev (robot-row))
   (robot-col-prev (robot-col))
   (chicken-row (random-row))
   (chicken-col (random-col))
-  
+
   (rfc-splash)
 
   (mvprintw 1 (- (COLS) 32) "Press H any time to view help.")
   (rfc-loop))
 
 (define (rfc-loop)
-  (if (moved?) (draw-robot))
+  (if (moved?) ; Only redraw if the action taken was movement.
+      (draw-robot)) ; Other keys are ignored within the loop.
 
   (case (getch)
     ((#\q #\Q KEY_F0)
      (quit "You couldn't find the chicken." 0))
     ((#\8 KEY_UP)
-     (move v: 'up))
+     (move-robot
+      v: 'up))
     ((#\9)
-     (move v: 'up
-           h: 'right))
+     (move-robot
+      v: 'up
+      h: 'right))
     ((#\6 KEY_RIGHT)
-     (move h: 'right))
+     (move-robot
+      h: 'right))
     ((#\3)
-     (move v: 'down
-           h: 'right))
+     (move-robot
+      v: 'down
+      h: 'right))
     ((#\2 KEY_DOWN)
-     (move v: 'down))
+     (move-robot
+      v: 'down))
     ((#\1)
-     (move v: 'down h: 'left))
+     (move-robot
+      v: 'down
+      h: 'left))
     ((#\4 KEY_LEFT)
-     (move h: 'left))
+     (move-robot
+      h: 'left))
     ((#\7)
-     (move v: 'up
-           h: 'left))
+     (move-robot
+      v: 'up
+      h: 'left))
     ((#\h #\H KEY_F1 KEY_HELP)
      (rfc-splash)))
 
@@ -196,7 +212,7 @@
 
 (define (rfc-win)
   (clear)
-  (flushinp)
+  (flushinp) ; stop taking input
   (rfc-frame)
 
   (robot-row 1)
@@ -211,8 +227,8 @@
   (repeat
    (lambda ()
      (thread-sleep! 0.8)
-     (move h: 'right)
-     (draw-robot)
+     (move-robot h: 'right)
+     (draw-robot) ; TODO: make chicken move left
      (refresh))
    6)
   

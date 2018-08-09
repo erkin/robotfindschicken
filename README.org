@@ -1,3 +1,32 @@
-* robotfindschicken
-  A work-in-progress clone of =robotfindskitten= in Scheme.
+* robotfindschicken v0.-1.3
+  A work-in-progress [[http://call-cc.org/][Galloschematic]] clone of beloved =robotfindskitten=.
 
+** Frequently asked questions
+*** What is it good for?
+    Glad you asked! It
+    * Is a perfect conversation topic for the daily 11 o'clock talk by the
+      water cooler.
+    * Soothes, cleanses and heals the soul, and immanentises the
+     eschaton.
+    * Is a great Xmas gift for small children with an affinity for fowl.
+    * Makes for a great summer adventure to look back and reminisce
+      about three decades from now.
+    * Makes de Gaulle flee to resort towns in Germany.
+    * Contributes to global warming.
+    * Creates new job opportunities.
+    * Absolutely destroys you at beer pong.\dagger
+
+*** Oh gee, I sure would love to "play" this "game"!
+    Uh-uh-uh! Not so fast, champion! Although I appreciate your
+    enthusiasm. You see, it's far from complete right now.
+
+*** Shucks! Can I still try it?
+    Of course! Why you just need to =chicken-install -s ncurses= to
+    obtain the bindings and =csi -w -ss src/rfc.scm= here.
+
+*** My my, I believe I just found chicken!
+    Well done, old sport! Well done!
+
+\dagger: May or may not actually do any of the stated things. Consult
+your doctor and their pineal gland to find out whether
+=robotfindschicken= is the right treatment for your spiritual needs.
