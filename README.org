@@ -1,0 +1,3 @@
+* robotfindschicken
+  A work-in-progress clone of =robotfindskitten= in Scheme.
+
