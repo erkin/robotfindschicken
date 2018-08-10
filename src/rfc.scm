@@ -133,7 +133,6 @@
   (attroff (COLOR_PAIR CONTROL_COLOUR))
 
   (attron (COLOR_PAIR MESSAGE_COLOUR))
-  (centre-message "You are the Robot!" "Find the Chicken!" "Godspeed!")
   (mvaddch (- (LINES) 3) 8 (ACS_PLUS))
   (attroff (COLOR_PAIR MESSAGE_COLOUR))
     
@@ -160,7 +159,7 @@
   (init_pair HELP_COLOUR COLOR_GREEN COLOR_BLACK)
   (init_pair CONTROL_COLOUR COLOR_MAGENTA COLOR_BLACK)
   (init_pair EXTRA_COLOUR COLOR_BLUE COLOR_BLACK)
-  (init_pair ROBOT_COLOUR COLOR_GREEN COLOR_WHITE)
+  (init_pair ROBOT_COLOUR COLOR_GREEN COLOR_BLUE)
   
 
   (raw) (noecho)
@@ -176,6 +175,10 @@
   (chicken-row (random-row))
   (chicken-col (random-col))
 
+  (attron (COLOR_PAIR MESSAGE_COLOUR))
+  (centre-message "You are the Robot!" "Find the Chicken!" "Godspeed!")
+  (attroff (COLOR_PAIR MESSAGE_COLOUR))
+
   (rfc-splash)
 
   (mvprintw 1 (- (COLS) 32) "Press H any time to view help.")
@@ -187,7 +190,7 @@
 
   (case (getch)
     ((#\q #\Q KEY_F0)
-     (quit "You couldn't find the chicken." 0))
+     (quit "You couldn't find the chicken. Sad!" 0))
     ((#\8 KEY_UP)
      (move-robot
       v: 'up))
