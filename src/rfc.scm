@@ -233,7 +233,7 @@
   (robot-col (- (quotient (COLS) 2) 4))
   
   (chicken-row 1)
-  (chicken-col (+ (quotient (COLS) 2) 3))
+  (chicken-col (+ (quotient (COLS) 2) 5))
 
   (draw-robot)
   (draw-chicken)
@@ -242,10 +242,15 @@
    (lambda ()
      (thread-sleep! 0.8)
      (move-robot h: 'right)
-     (draw-robot) ; TODO: make chicken move left
+     (chicken-col (sub1 (chicken-col)))
+     (draw-robot)
+     (draw-chicken)
+     (mvaddch (chicken-row) (add1 (chicken-col)) #\ )
      (refresh))
-   6)
-  
+   4)
+
+  (thread-sleep! 0.5)
+
   (attron (COLOR_PAIR MESSAGE_COLOUR))
   (centre-message "You found the chicken!" "Bravo!")
   (attroff (COLOR_PAIR MESSAGE_COLOUR))
