@@ -1,5 +1,5 @@
 * robotfindschicken v0.-1.3
-  A work-in-progress [[https://call-cc.org/][Galloschematic]] clone of beloved =[[http://robotfindskitten.org/][robotfindskitten]]=.
+  A work-in-progress [[https://call-cc.org/][Galloschematic]] clone of beloved [[http://robotfindskitten.org/][robotfindskitten]].
 
 ** Frequently asked questions
 *** What is it good for?
