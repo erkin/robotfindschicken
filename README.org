@@ -1,8 +1,8 @@
-* robotfindschicken v0.-1.3
+* robotfindschicken v0.-1.5
   A work-in-progress [[https://call-cc.org/][Galloschematic]] clone of beloved [[http://robotfindskitten.org/][robotfindskitten]].
 
 ** Frequently asked questions
-*** What is it good for?
+*** Oh dear. What is it good for?
     Glad you asked! It
     * Is a perfect conversation topic for the daily 11 o'clock talk by
       the water cooler.
@@ -18,17 +18,22 @@
     * Contributes to global warming.
     * Creates new job opportunities.
     * Absolutely destroys you at beer pong.\dagger
-      
+
 *** Oh gee, I sure would love to "play" this "game"!
     Uh-uh-uh! Not so fast, champion! Although I appreciate your
-    enthusiasm. You see, it's far from complete right now.
+    enthusiasm, it's far from complete right now. You see, 90% of the
+    code here was sneakily written in one slow day at work. You just
+    gotta wait for another such day for a push to finalise it.
 
 *** Shucks! Can I still try it?
     Of course! Why you just need to =chicken-install -s ncurses= to
-    obtain the bindings and =csi -w -ss src/rfc.scm= here.
+    obtain the bindings and compile it with =csc src/rfc.scm -o rfc=
+    here, and bam! Bob's your uncle! Then you can just =./rfc= and
+    enjoy the ride. Bon voyage!
 
 *** My my, I believe I just found chicken!
     Well done, old sport! Well done!
+
 
 \dagger: May or may not actually do any of the stated things. Consult
 your doctor and their pineal gland to find out whether

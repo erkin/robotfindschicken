@@ -1,4 +1,3 @@
-#!/usr/bin/csi -ss
 (use ncurses)
 (require-extension srfi-13)
 (require-extension srfi-18)
@@ -23,7 +22,7 @@
 (define chicken-row (make-parameter 1))
 (define chicken-col (make-parameter 1))
 
-(define (quit message code)
+(define (quit-game message code)
   (flushinp) ; Stop input to avoid cluttering the terminal
   (attroff A_BOLD)
   (clear)
@@ -137,7 +136,7 @@
   (attroff (COLOR_PAIR MESSAGE_COLOUR))
     
   (if (member (getch) '(#\q #\Q KEY_F0)) ; Mock the player for
-      (quit "That was quick." 0)) ; exiting on help screen.
+      (quit-game "That was quick." 0)) ; exiting on help screen.
 
   (clear) ; Now that the player pressed a key, clear the screen
 
@@ -149,7 +148,7 @@
   (initscr)
 
   (if (not (has_colors))
-      (quit "Your terminal does not support colours." 1))
+      (quit-game "Your terminal does not support colours." 1))
   
   (start_color)
   (init_pair FRAME_COLOUR COLOR_BLUE COLOR_BLACK)
@@ -190,7 +189,7 @@
 
   (case (getch)
     ((#\q #\Q KEY_F0)
-     (quit "You couldn't find the chicken. Sad!" 0))
+     (quit-game "You couldn't find the Chicken. Sad!" 0))
     ((#\8 KEY_UP)
      (move-robot
       v: 'up))
@@ -229,11 +228,13 @@
   (flushinp) ; stop taking input
   (rfc-frame)
 
+  (mvprintw 1 (- (COLS) 9) "Aww...")
+  
   (robot-row 1)
-  (robot-col (- (quotient (COLS) 2) 4))
+  (robot-col (+ (quotient (COLS) 2) 4))
   
   (chicken-row 1)
-  (chicken-col (+ (quotient (COLS) 2) 5))
+  (chicken-col (- (quotient (COLS) 2) 5))
 
   (draw-robot)
   (draw-chicken)
@@ -241,26 +242,35 @@
   (repeat
    (lambda ()
      (thread-sleep! 0.8)
-     (move-robot h: 'right)
-     (chicken-col (sub1 (chicken-col)))
+     (move-robot h: 'left)
+     (chicken-col (add1 (chicken-col)))
      (draw-robot)
      (draw-chicken)
-     (mvaddch (chicken-row) (add1 (chicken-col)) #\ )
+     (mvaddch (chicken-row) (sub1 (chicken-col)) #\ )
      (refresh))
    4)
 
   (thread-sleep! 0.5)
 
   (attron (COLOR_PAIR MESSAGE_COLOUR))
-  (centre-message "You found the chicken!" "Bravo!")
+  (centre-message "You found the Chicken!" "Good Robot!")
   (attroff (COLOR_PAIR MESSAGE_COLOUR))
+
+  (attron (COLOR_PAIR HELP_COLOUR))
+  (mvprintw (- (LINES) 2) (- (COLS) 24) "Press R to play again.")
+  (attroff (COLOR_PAIR HELP_COLOUR))
 
   (refresh)
   (thread-sleep! 1)
-  (getch)
-  (quit "Thanks for playing!" 0))
+  (when (member (getch) '(#\r #\R))
+    (clear)
+    (endwin)
+    (rfc-init))
+  (quit-game "Thanks for playing!" 0))
 
 (define (main args)  
   (if (null? args)
       (rfc-init)
       (print "This program does not take options.")))
+
+(main (command-line-arguments))
