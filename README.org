@@ -1,5 +1,5 @@
 * robotfindschicken v0.-1.3
-  A work-in-progress [[http://call-cc.org/][Galloschematic]] clone of beloved [[http://robotfindskitten.org/][=robotfindskitten=]].
+  A work-in-progress [[https://call-cc.org/][Galloschematic]] clone of beloved [[http://robotfindskitten.org/][=robotfindskitten=]].
 
 ** Frequently asked questions
 *** What is it good for?
@@ -12,11 +12,11 @@
       fowl.      
     * Makes for a great summer adventure to look back and reminisce
       about three decades from now.
+    * Keeps your seat warm at the church on a chilly Sunday while you
+      stay home and enjoy an IPA.
     * Makes de Gaulle flee to resort towns in Germany.
     * Contributes to global warming.
     * Creates new job opportunities.
-    * Keeps your seat warm at the church on a chilly Sunday while you
-      stay home and enjoy an IPA.
     * Absolutely destroys you at beer pong.\dagger
       
 *** Oh gee, I sure would love to "play" this "game"!
