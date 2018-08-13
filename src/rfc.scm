@@ -32,12 +32,12 @@
 (define (random-col)
   (+ 1 (random (- (COLS) 2))))
 
+
 ;; Generate a number of locations to place non-chicken items
-(define (generate-stuff count stuff-list)
-  (if (zero? count)
-      stuff-list
-      (cons (cons (random-row) (random-col))
-            (generate-stuff (sub1 count) stuff-list))))
+(define (generate-stuff count)
+  (if (not (zero? count))
+      `(,((random-row) (random-col) (random-line))
+        ,(generate-stuff (sub1 count) stuff-list))))
 
 (define (quit-game message code)
   (flushinp) ; Stop input to avoid cluttering the terminal
@@ -69,7 +69,7 @@
 (define (draw-stuff stuffs)
   (define (draw-stuff-item stuff-alist)
     (unless (null? stuff-alist)
-      (mvaddch (caar stuff-alist) (cdar stuff-alist) #\@)
+      (mvaddch (caar stuff-alist) (cadar stuff-alist) #\@)
       (draw-stuff-item (cdr stuff-alist))))
   (attron (COLOR_PAIR EXTRA_COLOUR))
   (draw-stuff-item stuffs)
@@ -116,10 +116,11 @@
            (= (chicken-row) (robot-row)))
       (rfc-win))
 
+  ;;; FIX HERE
   (when (member (cons (robot-row) (robot-col)) stuff)
     (robot-row (robot-row-prev))
     (robot-col (robot-col-prev))
-    (mvprintw 1 2 "this an item"))
+    (mvprintw 1 2 ()))
   
   ;; We did something to merit redrawing.
   ;; Even if it's just bumping against the wall.
