@@ -1,3 +1,4 @@
+#!/usr/bin/csi -ss
 (use ncurses)
 (require-extension srfi-13)
 (require-extension srfi-18)
@@ -11,16 +12,32 @@
 (define-constant EXTRA_COLOUR   7)
 (define-constant ROBOT_COLOUR   8)
 
+(define moved? (make-parameter #f))
+
 (define robot-row (make-parameter 1))
 (define robot-col (make-parameter 1))
 
 (define robot-row-prev (make-parameter 1))
 (define robot-col-prev (make-parameter 1))
 
-(define moved? (make-parameter #f))
-
 (define chicken-row (make-parameter 1))
 (define chicken-col (make-parameter 1))
+
+(define-constant *stuff-count* 5)
+
+(define stuff '())
+
+(define (random-row)
+  (+ 3 (random (- (LINES) 5))))
+(define (random-col)
+  (+ 1 (random (- (COLS) 2))))
+
+;; Generate a number of locations to place non-chicken items
+(define (generate-stuff count stuff-list)
+  (if (zero? count)
+      stuff-list
+      (cons (cons (random-row) (random-col))
+            (generate-stuff (sub1 count) stuff-list))))
 
 (define (quit-game message code)
   (flushinp) ; Stop input to avoid cluttering the terminal
@@ -49,10 +66,14 @@
          (f)
          (repeat f (sub1 n))))))
 
-(define (random-row)
-  (+ 3 (random (- (LINES) 5))))
-(define (random-col)
-  (+ 1 (random (- (COLS) 2))))
+(define (draw-stuff stuffs)
+  (define (draw-stuff-item stuff-alist)
+    (unless (null? stuff-alist)
+      (mvaddch (caar stuff-alist) (cdar stuff-alist) #\@)
+      (draw-stuff-item (cdr stuff-alist))))
+  (attron (COLOR_PAIR EXTRA_COLOUR))
+  (draw-stuff-item stuffs)
+  (attroff (COLOR_PAIR EXTRA_COLOUR)))
 
 (define (draw-chicken)
   (attron (COLOR_PAIR CHICKEN_COLOUR))
@@ -67,6 +88,7 @@
   (moved? #f))
 
 (define (move-robot #!key (v 'nil) (h 'nil))
+  (mvprintw 1 2 (make-string (- (COLS) 35) #\ ))
   (robot-row-prev (robot-row))
   (robot-col-prev (robot-col))
 
@@ -94,6 +116,11 @@
            (= (chicken-row) (robot-row)))
       (rfc-win))
 
+  (when (member (cons (robot-row) (robot-col)) stuff)
+    (robot-row (robot-row-prev))
+    (robot-col (robot-col-prev))
+    (mvprintw 1 2 "this an item"))
+  
   ;; We did something to merit redrawing.
   ;; Even if it's just bumping against the wall.
   (moved? #t))
@@ -141,6 +168,7 @@
   (clear) ; Now that the player pressed a key, clear the screen
 
   (rfc-frame) ; And redraw the game elements
+  (draw-stuff stuff)
   (draw-robot)
   (draw-chicken))
 
@@ -149,7 +177,7 @@
 
   (if (not (has_colors))
       (quit-game "Your terminal does not support colours." 1))
-  
+
   (start_color)
   (init_pair FRAME_COLOUR COLOR_BLUE COLOR_BLACK)
   (init_pair DECOR_COLOUR COLOR_CYAN COLOR_BLACK)
@@ -159,7 +187,8 @@
   (init_pair CONTROL_COLOUR COLOR_MAGENTA COLOR_BLACK)
   (init_pair EXTRA_COLOUR COLOR_BLUE COLOR_BLACK)
   (init_pair ROBOT_COLOUR COLOR_GREEN COLOR_BLUE)
-  
+
+  (set! stuff (generate-stuff *stuff-count* '()))
 
   (raw) (noecho)
   (keypad (stdscr) #t)
@@ -238,6 +267,7 @@
 
   (draw-robot)
   (draw-chicken)
+  (draw-stuff stuff)
 
   (repeat
    (lambda ()
