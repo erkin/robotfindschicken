@@ -17,22 +17,47 @@
 
 ;;;;
 
+
 ;;;; Constant values and global variables
 
 ;;; Colours
-(define-constant FRAME_COLOUR   1)
-(define-constant DECOR_COLOUR   2)
-(define-constant CHICKEN_COLOUR 3)
-(define-constant MESSAGE_COLOUR 4)
-(define-constant HELP_COLOUR    5)
-(define-constant CONTROL_COLOUR 6)
-(define-constant EXTRA_COLOUR   7)
-(define-constant ROBOT_COLOUR   8)
+(define-constant *frame-colour*   1)
+(define-constant *decor-colour*   2)
+(define-constant *chicken-colour* 3)
+(define-constant *message-colour* 4)
+(define-constant *help-colour*    5)
+(define-constant *control-colour* 6)
+(define-constant *extra-colour*   7)
+(define-constant *robot-colour*   8)
 
 (define-constant messages
-  '("this is a foo"
-    "this is a bar"
-    "this is a qux"))
+  '("This is a bottle of a soft drink. Warm and flat."
+    "This is an action figure of Guy Steele, 1:18 scale."
+    "This is a VAXServer running OpenVMS 8.3."
+    "This is a potted plant of dubious legality. It needs watering."
+    "This is a picture of a woman wearing a hat with feathers. Compression artifacts distorted her face but it looks familiar."
+    "This is a 3D model of a bunny containing 69451  polygons. You do not feel like verifying that claim."
+    "This is a Canterbury corpus in folio, bound in leather of Stanford bunnies."
+    "This is almost a chicken, but not quite. Try harder."
+    "This is a Knuth reward check for one hexadecimal dollar."
+    "This is a teapot. You are certain that you've seen it somewhere."
+    "This is a semi-automatic, conservatory key system oboe."
+    "This is a set of Slackware 1.0.0 installation floppy set."
+    "This is an ASCII-art picture of a naked woman printed with a line printer."
+    "This is an ASCII-art picture of a naked man printed with a dot-matrix printer."
+    "This is an ASCII-art picture of a naked person printed with a daisy-wheel printer."
+    "This is one of Paul Graham's oil paintings."
+    "This is an empty set. Barely visible."
+    "This is a LART made from depleted uranium."
+    "There is nothing here.                       fnord"
+    "You have no idea what is it, but you hope it's not what it looks like."
+    "This is a cheap knock-off of a platinum-iridium kilogramme standard."
+    "These are two bodies connected by a weightless string."
+    "This is a gift-wrapped set of straightedge and compasses."
+    "This is a handheld electronic Game of Life."
+    "This is a finite state machine."
+    "This is a fork that once belonged to one of the dining philosophers."
+    "This is a sleeping barber."))
 
 (define-constant chars
   '(#\! #\@ #\# #\$ #\% #\& #\*
@@ -54,7 +79,9 @@
 (define chicken-row (make-parameter 1))
 (define chicken-col (make-parameter 1))
 
+(define chicken-char #\@)
 ;;;;
+
 
 ;;;; Internal procedures
 
@@ -87,6 +114,7 @@
 
 ;;;;
 
+
 ;;;; Drawing procedures
 
 ;;; Draw non-robot non-chicken items
@@ -99,66 +127,73 @@
     (draw-stuff (cdr stuff-alist))))
 
 (define (draw-chicken)
-  (attron (COLOR_PAIR CHICKEN_COLOUR))
-  (mvaddch (chicken-row) (chicken-col) (ACS_CKBOARD))
-  (attroff (COLOR_PAIR CHICKEN_COLOUR)))
+  (attron (COLOR_PAIR *chicken-colour*))
+  (mvaddch (chicken-row) (chicken-col) chicken-char)
+  (attroff (COLOR_PAIR *chicken-colour*)))
 
 (define (draw-robot)
   ;; Remove the previous robot
   (mvaddch (robot-row-prev) (robot-col-prev) #\ )
 
-  (attron (COLOR_PAIR ROBOT_COLOUR))
+  (attron (COLOR_PAIR *robot-colour*))
   (mvaddch (robot-row) (robot-col) (ACS_DIAMOND))
-  (attroff (COLOR_PAIR ROBOT_COLOUR))
+  (attroff (COLOR_PAIR *robot-colour*))
 
   ;; Reset status
   (moved? #f))
 
 (define (draw-frame)
   ;; Frame around the box
-  (attron (COLOR_PAIR FRAME_COLOUR))
+  (attron (COLOR_PAIR *frame-colour*))
   (box (stdscr) (ACS_VLINE) (ACS_HLINE))
   (mvhline 2 1 (ACS_HLINE) (- (COLS) 2))
   (mvaddch 2 0 (ACS_LTEE))
   (mvaddch 2 (sub1 (COLS)) (ACS_RTEE))
-  (attroff (COLOR_PAIR FRAME_COLOUR))
+  (attroff (COLOR_PAIR *frame-colour*))
 
   ;; Fancy branding
-  (attron (COLOR_PAIR DECOR_COLOUR))
+  (attron (COLOR_PAIR *decor-colour*))
   (mvprintw 2 2 "robotfinds")
-  (attroff (COLOR_PAIR DECOR_COLOUR))
+  (attroff (COLOR_PAIR *decor-colour*))
 
-  (attron (COLOR_PAIR CHICKEN_COLOUR))
+  (attron (COLOR_PAIR *chicken-colour*))
   (printw "chicken")
-  (attroff (COLOR_PAIR CHICKEN_COLOUR)))
+  (attroff (COLOR_PAIR *chicken-colour*)))
 
 ;;;;
+
 
 ;;;; Movement procedures
 
 (define (check-position return)
   (define (check-item-position stuff)
-    (if (pair? stuff)
-        (begin
-          (let ((item (car stuff))) ; You bumped into an item
-            (when (and (= (car  item) (robot-row))
-                       (= (cadr item) (robot-col)))
-              (mvprintw 1 2 (caddr item)) ; Print item's message
-              (robot-row (robot-row-prev))
-              (robot-col (robot-col-prev))
-              (return #f)))
-          (check-item-position (cdr stuff))) ; Or was it another item?
-        (return #t))) ; Nope, you're clear.
-  
+    (when (pair? stuff)
+        (let ((item (car stuff))) ; You bumped into an item
+          (when (and (= (car  item) (robot-row))
+                     (= (cadr item) (robot-col)))
+            ;; Clip the string if it's too long.
+            (if (>= (string-length (caddr item)) (- (COLS) 3))
+                (begin
+                  (mvprintw 1 2 (string-take (caddr item) (- (COLS) 5)))
+                  (addch (ACS_RARROW))
+                  (addch (ACS_RARROW)))
+                (mvprintw 1 2 (caddr item))) ; Print item's message
+            (robot-row (robot-row-prev))
+            (robot-col (robot-col-prev))
+            (return #f)))
+        (check-item-position (cdr stuff)))) ; Or was it another item?
+
   (if (and (= (chicken-col) (robot-col)) ; You found chicken!
            (= (chicken-row) (robot-row)))
       (rfc-win))
 
-  (check-item-position stuff))
+  (check-item-position stuff)
+  (return #t)) ; Nope, you're clear.
+
 
 (define (move-robot #!key (v 'nil) (h 'nil))
   ;; Erase the message line
-  (mvprintw 1 2 (make-string (- (COLS) 35) #\ ))
+  (mvprintw 1 2 (make-string (- (COLS) 3) #\ ))
 
   (robot-row-prev (robot-row))
   (robot-col-prev (robot-col))
@@ -193,6 +228,7 @@
 
 ;;;;
 
+
 ;;;; Game sections
 
 (define (quit-game message code)
@@ -212,21 +248,21 @@
   ;; The ordering is important to avoid overwriting
   ;; some parts with whitespace.
 
-  (attron (COLOR_PAIR HELP_COLOUR))
+  (attron (COLOR_PAIR *help-colour*))
   (mvprintw (- (LINES) 2) (- (COLS) 18) "Press Q to exit.")
   (mvprintw (- (LINES) 3) 2 "Use       to move.")
   (mvprintw 3 3 "Press any key to begin/resume.")
-  (attroff (COLOR_PAIR HELP_COLOUR))
+  (attroff (COLOR_PAIR *help-colour*))
   
-  (attron (COLOR_PAIR CONTROL_COLOUR))
+  (attron (COLOR_PAIR *control-colour*))
   (mvprintw (- (LINES) 4) 6 "7 8 9")
   (mvprintw (- (LINES) 3) 6 "4   6")
   (mvprintw (- (LINES) 2) 6 "1 2 3")
-  (attroff (COLOR_PAIR CONTROL_COLOUR))
+  (attroff (COLOR_PAIR *control-colour*))
 
-  (attron (COLOR_PAIR MESSAGE_COLOUR))
+  (attron (COLOR_PAIR *message-colour*))
   (mvaddch (- (LINES) 3) 8 (ACS_PLUS))
-  (attroff (COLOR_PAIR MESSAGE_COLOUR))
+  (attroff (COLOR_PAIR *message-colour*))
 
   ;; Mock the player for exiting on help screen.
   (if (member (getch) '(#\q #\Q KEY_F0))
@@ -247,19 +283,24 @@
   (if (not (has_colors))
       (quit-game "Your terminal does not support colours." 1))
 
+  (if (or (< (COLS) 64)
+          (< (LINES) 32))
+      (quit-game "Your terminal is too small to run this." 1))
+  
   ;; Give integer aliases to colours. (See constants above.)
   (start_color)
-  (init_pair FRAME_COLOUR COLOR_BLUE COLOR_BLACK)
-  (init_pair DECOR_COLOUR COLOR_CYAN COLOR_BLACK)
-  (init_pair CHICKEN_COLOUR COLOR_RED COLOR_BLACK)
-  (init_pair MESSAGE_COLOUR COLOR_YELLOW COLOR_BLACK)
-  (init_pair HELP_COLOUR COLOR_GREEN COLOR_BLACK)
-  (init_pair CONTROL_COLOUR COLOR_MAGENTA COLOR_BLACK)
-  (init_pair EXTRA_COLOUR COLOR_BLUE COLOR_BLACK)
-  (init_pair ROBOT_COLOUR COLOR_GREEN COLOR_BLUE)
+  (init_pair *frame-colour* COLOR_BLUE COLOR_BLACK)
+  (init_pair *decor-colour* COLOR_CYAN COLOR_BLACK)
+  (init_pair *chicken-colour* COLOR_RED COLOR_BLACK)
+  (init_pair *message-colour* COLOR_YELLOW COLOR_BLACK)
+  (init_pair *help-colour* COLOR_GREEN COLOR_BLACK)
+  (init_pair *control-colour* COLOR_MAGENTA COLOR_BLACK)
+  (init_pair *extra-colour* COLOR_BLUE COLOR_BLACK)
+  (init_pair *robot-colour* COLOR_GREEN COLOR_BLUE)
 
   ;; columns/5 is good enough.
   (set! stuff (generate-stuff (quotient (COLS) 5))) 
+  (set! chicken-char (random-elem chars))
 
   (raw) (noecho)
   (keypad (stdscr) #t)
@@ -274,14 +315,15 @@
   (robot-col-prev (robot-col))
   (chicken-row (random-row))
   (chicken-col (random-col))
-
-  (attron (COLOR_PAIR MESSAGE_COLOUR))
+  
+  (attron (COLOR_PAIR *message-colour*))
   (centre-message "You are the Robot!" "Find the Chicken!" "Godspeed!")
-  (attroff (COLOR_PAIR MESSAGE_COLOUR))
+  (attroff (COLOR_PAIR *message-colour*))
 
   (rfc-splash)
 
-  (mvprintw 1 (- (COLS) 32) "Press H any time to view help.")
+  #; (mvprintw 1 (- (COLS) 32) "Press H any time to view help.")
+
   (rfc-loop))
 
 (define (rfc-loop)
@@ -320,7 +362,7 @@
      (move-robot
       v: 'up
       h: 'left))
-    ((#\h #\H KEY_F1 KEY_HELP)
+    ((#\h #\H KEY_F1 KEY_*help)
      (rfc-splash)))
 
   (rfc-loop))
@@ -359,13 +401,13 @@
 
   (thread-sleep! 0.5)
 
-  (attron (COLOR_PAIR MESSAGE_COLOUR))
+  (attron (COLOR_PAIR *message-colour*))
   (centre-message "You found the Chicken!" "Good Robot!")
-  (attroff (COLOR_PAIR MESSAGE_COLOUR))
+  (attroff (COLOR_PAIR *message-colour*))
 
-  (attron (COLOR_PAIR HELP_COLOUR))
+  (attron (COLOR_PAIR *help-colour*))
   (mvprintw (- (LINES) 2) (- (COLS) 24) "Press R to play again.")
-  (attroff (COLOR_PAIR HELP_COLOUR))
+  (attroff (COLOR_PAIR *help-colour*))
 
   (refresh)
   (thread-sleep! 1)
@@ -380,6 +422,7 @@
   (quit-game "Thanks for playing!" 0))
 
 ;;;;
+
 
 ;;;; Main
 
