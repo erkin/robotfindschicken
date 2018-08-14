@@ -31,33 +31,38 @@
 (define-constant *robot-colour*   8)
 
 (define-constant messages
-  '("This is a bottle of a soft drink. Warm and flat."
-    "This is an action figure of Guy Steele, 1:18 scale."
+  '("A bottle of a soft drink. Warm and flat."
+    "An action figure of Guy Steele, 1:18 scale."
     "This is a VAXServer running OpenVMS 8.3."
-    "This is a potted plant of dubious legality. It needs watering."
-    "This is a picture of a woman wearing a hat with feathers. Compression artifacts distorted her face but it looks familiar."
-    "This is a 3D model of a bunny containing 69451  polygons. You do not feel like verifying that claim."
+    "A potted plant of dubious legality. It needs watering."
+    "A picture of a woman wearing a hat with feathers. Compression artifacts distorted her face but it looks familiar."
+    "A 3D model of a bunny containing 69451 polygons. You do not feel like verifying that claim."
     "This is a Canterbury corpus in folio, bound in leather of Stanford bunnies."
     "This is almost a chicken, but not quite. Try harder."
-    "This is a Knuth reward check for one hexadecimal dollar."
+    "A cheque from Donald Knuth, for one hexadecimal dollar."
     "This is a teapot. You are certain that you've seen it somewhere."
-    "This is a semi-automatic, conservatory key system oboe."
-    "This is a set of Slackware 1.0.0 installation floppy set."
-    "This is an ASCII-art picture of a naked woman printed with a line printer."
-    "This is an ASCII-art picture of a naked man printed with a dot-matrix printer."
-    "This is an ASCII-art picture of a naked person printed with a daisy-wheel printer."
-    "This is one of Paul Graham's oil paintings."
-    "This is an empty set. Barely visible."
-    "This is a LART made from depleted uranium."
-    "There is nothing here.                       fnord"
-    "You have no idea what is it, but you hope it's not what it looks like."
-    "This is a cheap knock-off of a platinum-iridium kilogramme standard."
+    "A semi-automatic, conservatory key system oboe."
+    "A well-worn set of Slackware 1.0.0 installation floppy set."
+    "An EBCDIC-art picture of a naked woman printed with a line printer."
+    "An ANSI-art picture of a naked man printed with a dot-matrix printer."
+    "An ASCII-art picture of a naked person printed with a daisy-wheel printer."
+    "One of Paul Graham's oil paintings."
+    "An empty set. It's barely visible."
+    "A LART made from depleted uranium."
+    "There is absolutely nothing here.                       (fnord?)"
+    "You have no idea what this it, but you hope it's not what it looks like."
+    "This is a cheap knock-off of the platinum-iridium kilogramme standard."
     "These are two bodies connected by a weightless string."
-    "This is a gift-wrapped set of straightedge and compasses."
-    "This is a handheld electronic Game of Life."
-    "This is a finite state machine."
-    "This is a fork that once belonged to one of the dining philosophers."
-    "This is a sleeping barber."))
+    "A gift-wrapped set of straightedge and compasses."
+    "A handheld electronic console 'Game of Life'. Glidey!"
+    "A finite state machine. It appears to have stopped. Problematic."
+    "A fork that once belonged to one of the dining philosophers."
+    "This is a sleeping barber. Don't touch his locks."
+    "A +0 uncursed cockatrice corpse."
+    "A defiled altar formerly dedicated to the god of IT security."
+    "An electric cdr."
+    "It's a sleeping daemon."
+    "An old keyboard. The hyper key seems to be missing."))
 
 (define-constant chars
   '(#\! #\@ #\# #\$ #\% #\& #\*
@@ -315,15 +320,13 @@
   (robot-col-prev (robot-col))
   (chicken-row (random-row))
   (chicken-col (random-col))
-  
+
   (attron (COLOR_PAIR *message-colour*))
+  (mvprintw 1 (- (COLS) 32) "Press H any time to view help.")
   (centre-message "You are the Robot!" "Find the Chicken!" "Godspeed!")
   (attroff (COLOR_PAIR *message-colour*))
 
   (rfc-splash)
-
-  #; (mvprintw 1 (- (COLS) 32) "Press H any time to view help.")
-
   (rfc-loop))
 
 (define (rfc-loop)
@@ -362,7 +365,7 @@
      (move-robot
       v: 'up
       h: 'left))
-    ((#\h #\H KEY_F1 KEY_*help)
+    ((#\h #\H KEY_F1 KEY_HELP)
      (rfc-splash)))
 
   (rfc-loop))
@@ -389,7 +392,7 @@
 
   ;; Step by step / Move a little closer to me
   (repeat
-   (lambda ()
+   (lambda _
      (thread-sleep! 0.8)
      (move-robot h: 'left)
      (chicken-col (add1 (chicken-col)))
