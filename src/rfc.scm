@@ -3,6 +3,15 @@
 (require-extension srfi-13)
 (require-extension srfi-18)
 
+(define (repeat f n) ; run the procedure f n times
+  (if (= n 1)
+      (f)
+      ((lambda ()
+         (f)
+         (repeat f (sub1 n))))))
+(define (cadddar lst)
+  (car (cdddar lst)))
+
 (define-constant FRAME_COLOUR   1)
 (define-constant DECOR_COLOUR   2)
 (define-constant CHICKEN_COLOUR 3)
@@ -23,7 +32,10 @@
 (define chicken-row (make-parameter 1))
 (define chicken-col (make-parameter 1))
 
-(define-constant *stuff-count* 5)
+(define-constant messages
+  '("this is a foo"
+    "this is a bar"
+    "this is a qux"))
 
 (define stuff '())
 
@@ -31,13 +43,16 @@
   (+ 3 (random (- (LINES) 5))))
 (define (random-col)
   (+ 1 (random (- (COLS) 2))))
-
+(define (random-message)
+  (list-ref messages (random (length messages))))
 
 ;; Generate a number of locations to place non-chicken items
 (define (generate-stuff count)
   (if (not (zero? count))
-      `(,((random-row) (random-col) (random-line))
-        ,(generate-stuff (sub1 count) stuff-list))))
+      (cons (list (random-row) (random-col)
+                  (random-message) (add1 (random 7)))
+            (generate-stuff (sub1 count)))
+      '()))
 
 (define (quit-game message code)
   (flushinp) ; Stop input to avoid cluttering the terminal
@@ -59,21 +74,13 @@
       (centre-message-iter (cdr messages) (add1 n))))
   (centre-message-iter messages 0))
 
-(define (repeat f n) ; run the procedure f n times
-  (if (= n 1)
-      (f)
-      ((lambda ()
-         (f)
-         (repeat f (sub1 n))))))
-
-(define (draw-stuff stuffs)
-  (define (draw-stuff-item stuff-alist)
-    (unless (null? stuff-alist)
-      (mvaddch (caar stuff-alist) (cadar stuff-alist) #\@)
-      (draw-stuff-item (cdr stuff-alist))))
-  (attron (COLOR_PAIR EXTRA_COLOUR))
-  (draw-stuff-item stuffs)
-  (attroff (COLOR_PAIR EXTRA_COLOUR)))
+(define (draw-stuff stuff-alist)
+  (unless (null? stuff-alist)
+    (let ((item (car stuff-alist)))
+      (attron (COLOR_PAIR (cadddr item)))
+      (mvaddch (car item) (cadr item) #\@)
+      (attroff (COLOR_PAIR (cadddr item))))
+    (draw-stuff (cdr stuff-alist))))
 
 (define (draw-chicken)
   (attron (COLOR_PAIR CHICKEN_COLOUR))
@@ -86,6 +93,26 @@
   (mvaddch (robot-row) (robot-col) (ACS_DIAMOND))
   (attroff (COLOR_PAIR ROBOT_COLOUR))
   (moved? #f))
+
+(define (check-position return)
+  (define (check-item-position stuff)
+    (if (pair? stuff)
+        (begin
+          (let ((item (car stuff)))
+            (when (and (= (car  item) (robot-row))
+                       (= (cadr item) (robot-col)))
+              (mvprintw 1 2 (caddr item)) ; You bumped into an item.
+              (robot-row (robot-row-prev))
+              (robot-col (robot-col-prev))
+              (return #f)))
+          (check-item-position (cdr stuff)))
+        (return #t)))
+  
+  (if (and (= (chicken-col) (robot-col)) ; You found chicken!
+           (= (chicken-row) (robot-row)))
+      (rfc-win))
+
+  (check-item-position stuff))
 
 (define (move-robot #!key (v 'nil) (h 'nil))
   (mvprintw 1 2 (make-string (- (COLS) 35) #\ ))
@@ -112,19 +139,8 @@
       (if (= (robot-col) 0)
           (robot-col 1)))
 
-  (if (and (= (chicken-col) (robot-col)) ; You found chicken!
-           (= (chicken-row) (robot-row)))
-      (rfc-win))
-
-  ;;; FIX HERE
-  (when (member (cons (robot-row) (robot-col)) stuff)
-    (robot-row (robot-row-prev))
-    (robot-col (robot-col-prev))
-    (mvprintw 1 2 ()))
-  
-  ;; We did something to merit redrawing.
-  ;; Even if it's just bumping against the wall.
-  (moved? #t))
+  (moved? (call-with-current-continuation
+           (lambda (return) (check-position return)))))
 
 (define (rfc-frame)
   (attron (COLOR_PAIR FRAME_COLOUR))
@@ -162,7 +178,7 @@
   (attron (COLOR_PAIR MESSAGE_COLOUR))
   (mvaddch (- (LINES) 3) 8 (ACS_PLUS))
   (attroff (COLOR_PAIR MESSAGE_COLOUR))
-    
+  
   (if (member (getch) '(#\q #\Q KEY_F0)) ; Mock the player for
       (quit-game "That was quick." 0)) ; exiting on help screen.
 
@@ -189,7 +205,7 @@
   (init_pair EXTRA_COLOUR COLOR_BLUE COLOR_BLACK)
   (init_pair ROBOT_COLOUR COLOR_GREEN COLOR_BLUE)
 
-  (set! stuff (generate-stuff *stuff-count* '()))
+  (set! stuff (generate-stuff (quotient (COLS) 5)))
 
   (raw) (noecho)
   (keypad (stdscr) #t)
