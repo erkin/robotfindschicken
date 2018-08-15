@@ -72,6 +72,8 @@
 
 (define stuff '())
 
+(define stuff-count #f)
+
 ;;; Parameters to be altered
 (define moved? (make-parameter #f))
 
@@ -84,7 +86,7 @@
 (define chicken-row (make-parameter 1))
 (define chicken-col (make-parameter 1))
 
-(define chicken-char #\@)
+(define chicken-char #\ )
 ;;;;
 
 
@@ -100,7 +102,7 @@
 
 ;;; Generate a number of locations to place non-robot non-chicken items
 (define (generate-stuff count)
-  (if (not (zero? count))
+  (if (not (zero? (sub1 count)))
       (cons (list (random-row) (random-col)
                   (random-elem messages) (add1 (random 7)) ; Random colour
                   (random-elem chars))
@@ -173,20 +175,20 @@
 (define (check-position return)
   (define (check-item-position stuff)
     (when (pair? stuff)
-        (let ((item (car stuff))) ; You bumped into an item
-          (when (and (= (car  item) (robot-row))
-                     (= (cadr item) (robot-col)))
-            ;; Clip the string if it's too long.
-            (if (>= (string-length (caddr item)) (- (COLS) 3))
-                (begin
-                  (mvprintw 1 2 (string-take (caddr item) (- (COLS) 5)))
-                  (addch (ACS_RARROW))
-                  (addch (ACS_RARROW)))
-                (mvprintw 1 2 (caddr item))) ; Print item's message
-            (robot-row (robot-row-prev))
-            (robot-col (robot-col-prev))
-            (return #f)))
-        (check-item-position (cdr stuff)))) ; Or was it another item?
+      (let ((item (car stuff))) ; You bumped into an item
+        (when (and (= (car  item) (robot-row))
+                   (= (cadr item) (robot-col)))
+          ;; Clip the string if it's too long.
+          (if (>= (string-length (caddr item)) (- (COLS) 3))
+              (begin
+                (mvprintw 1 2 (string-take (caddr item) (- (COLS) 5)))
+                (addch (ACS_RARROW))
+                (addch (ACS_RARROW)))
+              (mvprintw 1 2 (caddr item))) ; Print item's message
+          (robot-row (robot-row-prev))
+          (robot-col (robot-col-prev))
+          (return #f)))
+      (check-item-position (cdr stuff)))) ; Or was it another item?
 
   (if (and (= (chicken-col) (robot-col)) ; You found chicken!
            (= (chicken-row) (robot-row)))
@@ -303,8 +305,15 @@
   (init_pair *extra-colour* COLOR_BLUE COLOR_BLACK)
   (init_pair *robot-colour* COLOR_GREEN COLOR_BLUE)
 
-  ;; columns/5 is good enough.
-  (set! stuff (generate-stuff (quotient (COLS) 5))) 
+  (set! stuff (generate-stuff
+               (if stuff-count
+                   (if (< stuff-count (COLS))
+                       ;; User provided amount of items
+                       stuff-count
+                       ;; Set it to number of columns if it's too many.
+                       (COLS))
+                   ;; Default is (columns+lines)/10
+                   (quotient (+ (COLS) (LINES)) 10))))
   (set! chicken-char (random-elem chars))
 
   (raw) (noecho)
@@ -429,10 +438,59 @@
 
 ;;;; Main
 
-(define (main args)  
+(define (rfc-usage)
+  (print "Usage: rfc [-n ITEMS]")
+  (print "  --help        Display this help message")
+  (print "  --items ITEMS Play the game with ITEMS number of items")
+  (print "  --version     Display version and licence information")
+  (exit))
+
+(define (rfc-version)
+  (print   "robotfindschicken v1.-1.5")
+  (print   "Copyright (C) 2018 Erkin Batu Altunbaş")
+  (newline)
+  (print* "Each file of this project's source code is subject ")
+  (print  "to the terms of the Mozilla Public Licence v2.0")
+  (print* "If a copy of the MPL was not distributed with this file, ")
+  (print  "you can obtain one at https://mozilla.org/MPL/2.0/")
+  (exit))
+
+(define (rfc-options args)
+  (define (rfc-items rest)
+     (if (null? rest)
+         (rfc-usage))
+     (let ((n (string->number (car rest))))
+       (cond
+        ((not n)
+         (print "Not a valid number: " (car rest))
+         (newline)
+         (exit 1))
+       ((and
+         (exact? n)
+         (> n 0))
+        (set! stuff-count n)
+        (rfc-init))
+       (else
+        (print "Not a suitable number: " n)
+        (print "Ignoring...")
+        (newline)
+        (rfc-init)))))
+
+  (let ((arg (car args)))
+    (cond
+     ((member arg '("-h" "-H" "-?" "--help" "-help"))
+      (rfc-usage))
+     ((member arg '("-v" "-V" "--version" "-version"))
+      (rfc-version))
+     ((member arg '("-n" "-N" "--items" "-items"))
+      (rfc-items (cdr args)))
+     (else
+      (rfc-usage)))))
+
+(define (main args)
   (if (null? args)
       (rfc-init)
-      (print "This program does not take options.")))
+      (rfc-options args)))
 
 (main (command-line-arguments))
 
