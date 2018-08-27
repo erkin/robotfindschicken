@@ -12,9 +12,6 @@
          (f)
          (repeat f (sub1 n))))))
 
-(define (caddddr lst)
-  (car (cddddr lst)))
-
 ;;;;
 
 
@@ -70,23 +67,23 @@
     #\| #\' #\, #\. #\; #\: #\"
     #\< #\> #\` #\~))
 
-(define stuff '())
+(define-record item
+  row col message colour char)
 
-(define stuff-count #f)
+(define-record robot
+  row col row-prev col-prev
+  moved? colour char)
 
-;;; Parameters to be altered
-(define moved? (make-parameter #f))
+(define items '())
 
-(define robot-row (make-parameter 1))
-(define robot-col (make-parameter 1))
+(define item-count #f)
 
-(define robot-row-prev (make-parameter 1))
-(define robot-col-prev (make-parameter 1))
-
+;; Parameters to be altered
 (define chicken-row (make-parameter 1))
 (define chicken-col (make-parameter 1))
 
 (define chicken-char #\ )
+
 ;;;;
 
 
@@ -101,37 +98,41 @@
   (list-ref lst (random (length lst))))
 
 ;;; Generate a number of locations to place non-robot non-chicken items
-(define (generate-stuff count)
+(define (generate-items count)
   (if (not (zero? (sub1 count)))
-      (cons (list (random-row) (random-col)
-                  (random-elem messages) (add1 (random 7)) ; Random colour
-                  (random-elem chars))
-            (generate-stuff (sub1 count)))
+      (cons (make-item
+             (random-row) (random-col)
+             (random-elem messages)
+             (add1 (random 7)) ; Random colour
+             (random-elem chars))
+            (generate-items (sub1 count)))
       '()))
 
 ;;; Write messages in the middle of the window
 (define (centre-message . messages)
   (define (centre-message-iter messages n) ; with doublespacing
     (when (pair? messages)
-      (mvprintw (+ (quotient (LINES) 2) (- n (length messages)))
-                (quotient (- (COLS) (string-length (car messages))) 2)
-                (car messages))
-      (centre-message-iter (cdr messages) (add1 n))))
+          (mvprintw (+ (quotient (LINES) 2) (- n (length messages)))
+                    (quotient (- (COLS) (string-length (car messages))) 2)
+                    (car messages))
+          (centre-message-iter (cdr messages) (add1 n))))
   (centre-message-iter messages 0))
 
 ;;;;
 
+(define robot #f)
 
 ;;;; Drawing procedures
 
 ;;; Draw non-robot non-chicken items
-(define (draw-stuff stuff-alist)
-  (unless (null? stuff-alist)
-    (let ((item (car stuff-alist)))
-      (attron (COLOR_PAIR (cadddr item)))
-      (mvaddch (car item) (cadr item) (caddddr item))
-      (attroff (COLOR_PAIR (cadddr item))))
-    (draw-stuff (cdr stuff-alist))))
+(define (draw-items item-list)
+  (unless (null? item-list)
+          (let ((item (car item-list)))
+            (attron (COLOR_PAIR (item-colour item)))
+            (mvaddch (item-row item) (item-col item)
+                     (item-char item))
+            (attroff (COLOR_PAIR (item-colour item))))
+          (draw-items (cdr item-list))))
 
 (define (draw-chicken)
   (attron (COLOR_PAIR *chicken-colour*))
@@ -140,14 +141,14 @@
 
 (define (draw-robot)
   ;; Remove the previous robot
-  (mvaddch (robot-row-prev) (robot-col-prev) #\ )
+  (mvaddch (robot-row-prev robot) (robot-col-prev robot) #\ )
 
-  (attron (COLOR_PAIR *robot-colour*))
-  (mvaddch (robot-row) (robot-col) (ACS_DIAMOND))
-  (attroff (COLOR_PAIR *robot-colour*))
+  (attron (COLOR_PAIR (robot-colour robot)))
+  (mvaddch (robot-row robot) (robot-col robot) (robot-char robot))
+  (attroff (COLOR_PAIR (robot-colour robot)))
 
   ;; Reset status
-  (moved? #f))
+  (robot-moved?-set! robot #f))
 
 (define (draw-frame)
   ;; Frame around the box
@@ -173,28 +174,28 @@
 ;;;; Movement procedures
 
 (define (check-position return)
-  (define (check-item-position stuff)
-    (when (pair? stuff)
-      (let ((item (car stuff))) ; You bumped into an item
-        (when (and (= (car  item) (robot-row))
-                   (= (cadr item) (robot-col)))
-          ;; Clip the string if it's too long.
-          (if (>= (string-length (caddr item)) (- (COLS) 3))
-              (begin
-                (mvprintw 1 2 (string-take (caddr item) (- (COLS) 5)))
-                (addch (ACS_RARROW))
-                (addch (ACS_RARROW)))
-              (mvprintw 1 2 (caddr item))) ; Print item's message
-          (robot-row (robot-row-prev))
-          (robot-col (robot-col-prev))
-          (return #f)))
-      (check-item-position (cdr stuff)))) ; Or was it another item?
+  (define (check-item-position items)
+    (when (pair? items)
+          (let ((item (car items))) ; You bumped into an item
+            (when (and (= (item-row item) (robot-row robot))
+                       (= (item-col item) (robot-col robot)))
+                  ;; Clip the string if it's too long.
+                  (if (>= (string-length (item-message item)) (- (COLS) 3))
+                      (begin
+                        (mvprintw 1 2 (string-take (item-message item) (- (COLS) 5)))
+                        (addch (ACS_RARROW))
+                        (addch (ACS_RARROW)))
+                      (mvprintw 1 2 (item-message item))) ; Print item's message
+                  (robot-row-set! robot (robot-row-prev robot))
+                  (robot-col-set! robot (robot-col-prev robot))
+                  (return #f)))
+          (check-item-position (cdr items)))) ; Or was it another item?
 
-  (if (and (= (chicken-col) (robot-col)) ; You found chicken!
-           (= (chicken-row) (robot-row)))
+  (if (and (= (chicken-col) (robot-col robot)) ; You found chicken!
+           (= (chicken-row) (robot-row    robot)))
       (rfc-win))
 
-  (check-item-position stuff)
+  (check-item-position items)
   (return #t)) ; Nope, you're clear.
 
 
@@ -202,36 +203,38 @@
   ;; Erase the message line
   (mvprintw 1 2 (make-string (- (COLS) 3) #\ ))
 
-  (robot-row-prev (robot-row))
-  (robot-col-prev (robot-col))
+  ;; Save old position
+  (robot-row-prev-set! robot (robot-row robot))
+  (robot-col-prev-set! robot (robot-col robot))
 
   ;; Vertical movement
   (if (eq? v 'up)
-      (robot-row (sub1 (robot-row)))
+      (robot-row-set! robot (sub1 (robot-row robot)))
       (if (eq? v 'down)
-          (robot-row (add1 (robot-row)))))
+          (robot-row-set! robot (add1 (robot-row robot)))))
 
   ;; Horizontal movement
   (if (eq? h 'left)
-      (robot-col (sub1 (robot-col)))
+      (robot-col-set! robot (sub1 (robot-col robot)))
       (if (eq? h 'right)
-          (robot-col (add1 (robot-col)))))
+          (robot-col-set! robot (add1 (robot-col robot)))))
 
   ;; Vertical boundary check
-  (if (= (robot-row) (- (LINES) 1))
-      (robot-row (- (LINES) 2))
-      (if (= (robot-row) 2)
-          (robot-row 3)))
+  (if (= (robot-row robot) (- (LINES) 1))
+      (robot-row-set! robot (- (LINES) 2))
+      (if (= (robot-row robot) 2)
+          (robot-row-set! robot 3)))
 
   ;; Horizontal boundary check
-  (if (= (robot-col) (- (COLS) 1))
-      (robot-col (- (COLS) 2))
-      (if (= (robot-col) 0)
-          (robot-col 1)))
+  (if (= (robot-col robot) (- (COLS) 1))
+      (robot-col-set! robot (- (COLS) 2))
+      (if (= (robot-col robot) 0)
+          (robot-col-set! robot 1)))
 
   ;; Did we move or bump into something?
-  (moved? (call-with-current-continuation
-           (lambda (return) (check-position return)))))
+  (robot-moved?-set! robot
+                     (call-with-current-continuation
+                      (lambda (return) (check-position return)))))
 
 ;;;;
 
@@ -245,8 +248,8 @@
   (clear)
   (endwin)
   (unless (zero? code)
-    (fprintf (current-error-port) message)
-    (exit code)) ; quit with an error
+          (fprintf (current-error-port) message)
+          (exit code)) ; quit with an error
   (print message)
   (exit))
 
@@ -280,7 +283,7 @@
 
   ;; And redraw the game elements.
   (draw-frame)
-  (draw-stuff stuff) ; how descriptive
+  (draw-items items) ; how descriptive
   (draw-robot)
   (draw-chicken))
 
@@ -290,8 +293,8 @@
   (if (not (has_colors))
       (quit-game "Your terminal does not support colours." 1))
 
-  (if (or (< (COLS) 64)
-          (< (LINES) 32))
+  (if (or (< (COLS) 32)
+          (< (LINES) 16))
       (quit-game "Your terminal is too small to run this." 1))
   
   ;; Give integer aliases to colours. (See constants above.)
@@ -305,11 +308,11 @@
   (init_pair *extra-colour* COLOR_BLUE COLOR_BLACK)
   (init_pair *robot-colour* COLOR_GREEN COLOR_BLUE)
 
-  (set! stuff (generate-stuff
-               (if stuff-count
-                   (if (< stuff-count (COLS))
+  (set! items (generate-items
+               (if item-count
+                   (if (< item-count (COLS))
                        ;; User provided amount of items
-                       stuff-count
+                       item-count
                        ;; Set it to number of columns if it's too many.
                        (COLS))
                    ;; Default is (columns+lines)/10
@@ -322,11 +325,11 @@
 
   (attron A_BOLD)
 
-  ;; Random initial positions
-  (robot-row (random-row))
-  (robot-col (random-col))
-  (robot-row-prev (robot-row))
-  (robot-col-prev (robot-col))
+  (set! robot
+        (make-robot 
+         (random-row) (random-col) 5 5
+         #f *robot-colour* (ACS_DIAMOND)))
+
   (chicken-row (random-row))
   (chicken-col (random-col))
 
@@ -341,7 +344,7 @@
 (define (rfc-loop)
   ;; Only redraw if the action taken was movement.
   ;; Other keys don't result in a redraw.
-  (if (moved?) (draw-robot))
+  (if (robot-moved? robot) (draw-robot))
 
   (case (getch)
     ((#\q #\Q KEY_F0)
@@ -388,8 +391,8 @@
   (mvprintw 1 (- (COLS) 9) "Aww...")
 
   ;; Place the robot on the message line.
-  (robot-row 1)
-  (robot-col (+ (quotient (COLS) 2) 4))
+  (robot-row-set! robot 1)
+  (robot-col-set! robot (+ (quotient (COLS) 2) 4))
 
   ;; And also the chicken.
   (chicken-row 1)
@@ -397,7 +400,7 @@
 
   (draw-robot)
   (draw-chicken)
-  (draw-stuff stuff) ; let the items remain
+  (draw-items items) ; let the items remain
 
   ;; Step by step / Move a little closer to me
   (repeat
@@ -426,9 +429,9 @@
 
   ;; Play again.
   (when (member (getch) '(#\r #\R))
-    (clear)
-    (endwin)
-    (rfc-init))
+        (clear)
+        (endwin)
+        (rfc-init))
 
   ;; Exit on any other key.
   (quit-game "Thanks for playing!" 0))
@@ -457,18 +460,18 @@
 
 (define (rfc-options args)
   (define (rfc-items rest)
-     (if (null? rest)
-         (rfc-usage))
-     (let ((n (string->number (car rest))))
-       (cond
-        ((not n)
-         (print "Not a valid number: " (car rest))
-         (newline)
-         (exit 1))
+    (if (null? rest)
+        (rfc-usage))
+    (let ((n (string->number (car rest))))
+      (cond
+       ((not n)
+        (print "Not a valid number: " (car rest))
+        (newline)
+        (exit 1))
        ((and
          (exact? n)
          (> n 0))
-        (set! stuff-count n)
+        (set! item-count n)
         (rfc-init))
        (else
         (print "Not a suitable number: " n)
