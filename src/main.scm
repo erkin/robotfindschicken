@@ -1,5 +1,6 @@
 #!/usr/bin/csi -s
 (use ncurses)
+(require-extension srfi-9)
 (require-extension srfi-13)
 (require-extension srfi-18)
 

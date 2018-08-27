@@ -3,11 +3,8 @@
 (define items '())
 (define item-count #f)
 
-(define chicken-row (make-parameter 1))
-(define chicken-col (make-parameter 1))
-(define chicken-char #\ )
-
 (define robot #f)
+(define chicken #f)
 
 ;;;;
 
@@ -78,7 +75,6 @@
                        (COLS))
                    ;; Default is (columns+lines)/10
                    (quotient (+ (COLS) (LINES)) 10))))
-  (set! chicken-char (random-elem chars))
 
   (raw) (noecho)
   (keypad (stdscr) #t)
@@ -87,12 +83,11 @@
   (attron A_BOLD)
 
   (set! robot
-        (make-robot 
+        (spawn-item
          (random-row) (random-col) 5 5
-         #f *robot-colour* (ACS_DIAMOND)))
+         #f "" *robot-colour* (ACS_DIAMOND)))
 
-  (chicken-row (random-row))
-  (chicken-col (random-col))
+  (set! chicken (car (generate-items 2)))
 
   (attron (COLOR_PAIR *message-colour*))
   (mvprintw 1 (- (COLS) 32) "Press H any time to view help.")
@@ -105,7 +100,7 @@
 (define (rfc-loop)
   ;; Only redraw if the action taken was movement.
   ;; Other keys don't result in a redraw.
-  (if (robot-moved? robot) (draw-robot))
+  (if (moved? robot) (draw-robot))
 
   (case (getch)
     ((#\q #\Q KEY_F0)
@@ -140,12 +135,12 @@
   (mvprintw 1 (- (COLS) 9) "Aww...")
 
   ;; Place the robot on the message line.
-  (robot-row-set! robot 1)
-  (robot-col-set! robot (+ (quotient (COLS) 2) 4))
+  (row-set! robot 1)
+  (col-set! robot (+ (quotient (COLS) 2) 4))
 
   ;; And also the chicken.
-  (chicken-row 1)
-  (chicken-col (- (quotient (COLS) 2) 5))
+  (row-set! chicken 1)
+  (col-set! chicken (- (quotient (COLS) 2) 5))
 
   (draw-robot)
   (draw-chicken)
@@ -156,10 +151,10 @@
    (lambda _
      (thread-sleep! 0.8)
      (move-robot h: 'left)
-     (chicken-col (add1 (chicken-col)))
+     (col-set! chicken (add1 (col-get chicken)))
      (draw-robot)
      (draw-chicken)
-     (mvaddch (chicken-row) (sub1 (chicken-col)) #\ )
+     (mvaddch (row-get chicken) (sub1 (col-get chicken)) #\ )
      (refresh))
    4)
 

@@ -14,7 +14,6 @@
 
 ;;;; Constant values
 
-;;; Colours
 (define-constant *frame-colour*   1)
 (define-constant *decor-colour*   2)
 (define-constant *chicken-colour* 3)
@@ -67,16 +66,24 @@
 ;;;;
 
 
-;;;;
-
-;;; Record definitions
+;;;; Record definitions
 
 (define-record item
-  row col message colour char)
-
-(define-record robot
   row col row-prev col-prev
-  moved? colour char)
+  moved? message colour char)
+
+(define-record-type item
+  (spawn-item row col row-prev col-prev
+              moved message colour char)
+  item?
+  (row row-get row-set!)
+  (col col-get col-set!)
+  (row-prev row-prev-get row-prev-set!)
+  (col-prev col-prev-get col-prev-set!)
+  (moved moved? moved!)
+  (message message-get message-set!)
+  (colour colour-get colour-set!)
+  (char char-get char-set!))
 
 ;;;;
 
@@ -94,9 +101,9 @@
 ;;; Generate a number of locations to place non-robot non-chicken items
 (define (generate-items count)
   (if (not (zero? (sub1 count)))
-      (cons (make-item
-             (random-row) (random-col)
-             (random-elem messages)
+      (cons (spawn-item
+             (random-row) (random-col) 0 0
+             #f (random-elem messages)
              (add1 (random 7)) ; Random colour
              (random-elem chars))
             (generate-items (sub1 count)))
