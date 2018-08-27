@@ -1,4 +1,4 @@
-* robotfindschicken v1.-1.5
+* robotfindschicken v1.-1.23
   A [[https://call-cc.org/][Galloschematic]] clone of beloved [[http://robotfindskitten.org/][robotfindskitten]].
 
 ** Frequently asked questions
@@ -22,11 +22,12 @@
 *** I sure would love to "play" this "game"!
     Why you're in luck today! You just need to
     =chicken-install -s ncurses= to obtain the bindings and compile it
-    with =csc src/rfc.scm -o rfc= here, and bam! Bob's your uncle!
+    with =csc src/main.scm -o rfc= here, and bam! Bob's your uncle!
     Then you can just =./rfc= and enjoy the ride. Bon voyage!
 
 *** My my, I believe I just found chicken!
     Well done, old sport! Well done!
+
 
 
 \dagger: May or may not actually do any of the stated things. Consult
