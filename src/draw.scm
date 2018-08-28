@@ -14,24 +14,24 @@
 (define (draw-items item-list)
   (unless (null? item-list)
           (let ((item (car item-list)))
-            (attron (COLOR_PAIR (colour-get item)))
-            (mvaddch (row-get item) (col-get item)
-                     (char-get item))
-            (attroff (COLOR_PAIR (colour-get item))))
+            (attron (COLOR_PAIR (colour item)))
+            (mvaddch (row item) (col item)
+                     (char item))
+            (attroff (COLOR_PAIR (colour item))))
           (draw-items (cdr item-list))))
 
 (define (draw-chicken)
-  (attron (COLOR_PAIR (colour-get chicken)))
-  (mvaddch (row-get chicken) (col-get chicken) (char-get chicken))
-  (attroff (COLOR_PAIR (colour-get chicken))))
+  (attron (COLOR_PAIR (colour chicken)))
+  (mvaddch (row chicken) (col chicken) (char chicken))
+  (attroff (COLOR_PAIR (colour chicken))))
 
 (define (draw-robot)
   ;; Remove the previous robot
-  (mvaddch (row-prev-get robot) (col-prev-get robot) #\ )
+  (mvaddch (row-prev robot) (col-prev robot) #\ )
 
-  (attron (COLOR_PAIR (colour-get robot)))
-  (mvaddch (row-get robot) (col-get robot) (char-get robot))
-  (attroff (COLOR_PAIR (colour-get robot)))
+  (attron (COLOR_PAIR (colour robot)))
+  (mvaddch (row robot) (col robot) (char robot))
+  (attroff (COLOR_PAIR (colour robot)))
 
   ;; Reset status
   (moved! robot #f))

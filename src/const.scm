@@ -81,17 +81,19 @@
   moved? message colour char)
 
 (define-record-type item
-  (spawn-item row col row-prev col-prev
-              moved message colour char)
+  (spawn-item item-row item-col
+              item-row-prev item-col-prev
+              moved item-message
+              item-colour item-char)
   item?
-  (row row-get row-set!)
-  (col col-get col-set!)
-  (row-prev row-prev-get row-prev-set!)
-  (col-prev col-prev-get col-prev-set!)
-  (moved moved? moved!)
-  (message message-get message-set!)
-  (colour colour-get colour-set!)
-  (char char-get char-set!))
+  (item-row row row-set!)
+  (item-col col col-set!)
+  (item-row-prev row-prev row-prev-set!)
+  (item-col-prev col-prev col-prev-set!)
+  (item-message message message-set!)
+  (item-colour colour colour-set!)
+  (item-char char char-set!)
+  (moved moved? moved!))
 
 ;;;;
 

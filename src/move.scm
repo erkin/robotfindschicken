@@ -4,21 +4,21 @@
   (define (check-item-position items)
     (when (pair? items)
           (let ((item (car items))) ; You bumped into an item
-            (when (and (= (row-get item) (row-get robot))
-                       (= (col-get item) (col-get robot)))
+            (when (and (= (row item) (row robot))
+                       (= (col item) (col robot)))
                   ;; Clip the string if it's too long.
-                  (if (>= (string-length (message-get item)) (- (COLS) 3))
+                  (if (>= (string-length (message item)) (- (COLS) 3))
                       (begin
-                        (mvprintw 1 2 (string-take (message-get item) (- (COLS) 5)))
+                        (mvprintw 1 2 (string-take (message item) (- (COLS) 5)))
                         (addch (ACS_RARROW)) (addch (ACS_RARROW)))
-                      (mvprintw 1 2 (message-get item))) ; Print item's message
-                  (row-set! robot (row-prev-get robot))
-                  (col-set! robot (col-prev-get robot))
+                      (mvprintw 1 2 (message item))) ; Print item's message
+                  (row-set! robot (row-prev robot))
+                  (col-set! robot (col-prev robot))
                   (return #f)))
           (check-item-position (cdr items)))) ; Or was it another item?
 
-  (if (and (= (col-get chicken) (col-get robot)) ; You found chicken!
-           (= (row-get chicken) (row-get robot)))
+  (if (and (= (col chicken) (col robot)) ; You found chicken!
+           (= (row chicken) (row robot)))
       (rfc-win))
 
   (check-item-position items)
@@ -30,31 +30,31 @@
   (mvprintw 1 2 (make-string (- (COLS) 3) #\ ))
 
   ;; Save old position
-  (row-prev-set! robot (row-get robot))
-  (col-prev-set! robot (col-get robot))
+  (row-prev-set! robot (row robot))
+  (col-prev-set! robot (col robot))
 
   ;; Vertical movement
   (if (eq? v 'up)
-      (row-set! robot (sub1 (row-get robot)))
+      (row-set! robot (sub1 (row robot)))
       (if (eq? v 'down)
-          (row-set! robot (add1 (row-get robot)))))
+          (row-set! robot (add1 (row robot)))))
 
   ;; Horizontal movement
   (if (eq? h 'left)
-      (col-set! robot (sub1 (col-get robot)))
+      (col-set! robot (sub1 (col robot)))
       (if (eq? h 'right)
-          (col-set! robot (add1 (col-get robot)))))
+          (col-set! robot (add1 (col robot)))))
 
   ;; Vertical boundary check
-  (if (= (row-get robot) (- (LINES) 1))
+  (if (= (row robot) (- (LINES) 1))
       (row-set! robot (- (LINES) 2))
-      (if (= (row-get robot) 2)
+      (if (= (row robot) 2)
           (row-set! robot 3)))
 
   ;; Horizontal boundary check
-  (if (= (col-get robot) (- (COLS) 1))
+  (if (= (col robot) (- (COLS) 1))
       (col-set! robot (- (COLS) 2))
-      (if (= (col-get robot) 0)
+      (if (= (col robot) 0)
           (col-set! robot 1)))
 
   ;; Did we move or bump into something?

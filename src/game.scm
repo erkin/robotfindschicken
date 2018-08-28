@@ -151,10 +151,10 @@
    (lambda _
      (thread-sleep! 0.8)
      (move-robot h: 'left)
-     (col-set! chicken (add1 (col-get chicken)))
+     (col-set! chicken (add1 (col chicken)))
      (draw-robot)
      (draw-chicken)
-     (mvaddch (row-get chicken) (sub1 (col-get chicken)) #\ )
+     (mvaddch (row chicken) (sub1 (col chicken)) #\ )
      (refresh))
    4)
 
