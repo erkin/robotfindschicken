@@ -2,13 +2,8 @@
 (declare (uses rfc-draw))
 (declare (uses rfc-game))
 
-;; (require-extension srfi-9)
-;; (require-extension srfi-13)
-;; (require-extension srfi-18)
-
 (import rfc-const)
 (import rfc-draw)
-(import rfc-move)
 (import rfc-game)
 
 (define (rfc-usage)

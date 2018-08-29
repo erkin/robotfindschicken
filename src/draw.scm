@@ -4,6 +4,7 @@
 (module rfc-draw *
   (import chicken scheme)
   (use ncurses)
+
   (import rfc-const)
 
 ;;;; Drawing procedures
@@ -28,12 +29,12 @@
         (attroff (COLOR_PAIR (colour item))))
       (draw-items (cdr item-list))))
 
-  (define (draw-chicken)
+  (define (draw-chicken chicken)
     (attron (COLOR_PAIR (colour chicken)))
     (mvaddch (row chicken) (col chicken) (char chicken))
     (attroff (COLOR_PAIR (colour chicken))))
 
-  (define (draw-robot)
+  (define (draw-robot robot)
     ;; Remove the previous robot
     (mvaddch (row-prev robot) (col-prev robot) #\ )
 

@@ -2,7 +2,8 @@
 (declare (unit rfc-const))
 
 (module rfc-const *
-  (import chicken scheme extras)
+  (import chicken scheme)
+  (use (only extras fprintf random))
   (use ncurses)
   
 ;;;; Preliminary procedures
@@ -18,16 +19,16 @@
 
 ;;;; Constant values
 
-  (define-constant *frame-colour*   1)
-  (define-constant *decor-colour*   2)
-  (define-constant *chicken-colour* 3)
-  (define-constant *message-colour* 4)
-  (define-constant *help-colour*    5)
-  (define-constant *control-colour* 6)
-  (define-constant *extra-colour*   7)
-  (define-constant *robot-colour*   8)
+  (define *frame-colour*   1)
+  (define *decor-colour*   2)
+  (define *chicken-colour* 3)
+  (define *message-colour* 4)
+  (define *help-colour*    5)
+  (define *control-colour* 6)
+  (define *extra-colour*   7)
+  (define *robot-colour*   8)
 
-  (define-constant messages
+  (define messages
     '("A +0 uncursed cockatrice corpse."
       "A 3D model of a bunny containing 69451 polygons. You do not feel like verifying that claim."
       "A B+ tree in full bloom."
@@ -69,7 +70,7 @@
       "You found some slack."
       "You have no idea what this it, but you hope it's not what it looks like."))
 
-  (define-constant chars
+  (define chars
     '(#\! #\@ #\# #\$ #\% #\& #\*
       #\/ #\= #\? #\+ #\- #\_ #\\
       #\| #\' #\, #\. #\; #\: #\"
@@ -117,16 +118,4 @@
                (add1 (random 7))        ; Random colour
                (random-elem chars))
               (generate-items (sub1 count)))
-        '()))
-
-  (define (quit-game message code)
-    ;; Stop input to avoid cluttering the terminal
-    (flushinp)
-    (attroff A_BOLD)
-    (clear)
-    (endwin)
-    (unless (zero? code)
-      (fprintf (current-error-port) message)
-      (exit code))                      ; quit with an error
-    (print message)
-    (exit)))
+        '())))

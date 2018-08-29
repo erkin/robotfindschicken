@@ -4,7 +4,11 @@
 
 (module rfc-game *
   (import chicken scheme)
+  (require-extension (only srfi-18 thread-sleep!))
+  (require-extension (only srfi-13 string-take))
+  (use (only extras fprintf))
   (use ncurses)
+
   (import rfc-const rfc-draw)
 
 ;;;; Global values
@@ -15,13 +19,30 @@
   (define robot #f)
   (define chicken #f)
 
+
+;;;; In-game procedures
+  
+  (define (quit-game message code)
+    ;; Stop input to avoid cluttering the terminal.
+    (flushinp)
+    (attroff A_BOLD)
+    (clear)
+    (endwin)
+    (unless (zero? code)
+      (fprintf (current-error-port) message)
+      ;; Quit with an error.
+      (exit code))
+    (print message)
+    (exit))
+
   (define (check-position return)
     (define (check-item-position items)
       (when (pair? items)
-        (let ((item (car items))) ; You bumped into an item
+        (let ((item (car items)))
+          ;; You bumped into an item
           (when (and (= (row item) (row robot))
                      (= (col item) (col robot)))
-            ;; Clip the string if it's too long.
+            ;; Clip the message string if it's too long.
             (if (>= (string-length (message item)) (- (COLS) 3))
                 (begin
                   (mvprintw 1 2 (string-take (message item) (- (COLS) 5)))
@@ -32,12 +53,18 @@
             (return #f)))
         (check-item-position (cdr items)))) ; Or was it another item?
 
-    (if (and (= (col chicken) (col robot)) ; You found chicken!
+    ;; Is it the chicken?
+    (if (and (= (col chicken) (col robot))
              (= (row chicken) (row robot)))
+        ;; Way to go!
         (rfc-win))
 
+    ;; Was it an item?
+    ;; Let's inefficiently check all of them.
     (check-item-position items)
-    (return #t)) ; Nope, you're clear.
+
+    ;; Nope, you're clear.
+    (return #t))
 
 
   (define (move-robot #!key (v 'nil) (h 'nil))
@@ -111,8 +138,8 @@
     ;; And redraw the game elements.
     (draw-frame)
     (draw-items items)                  ; how descriptive
-    (draw-robot)
-    (draw-chicken))
+    (draw-robot robot)
+    (draw-chicken chicken))
 
   (define (rfc-init)
     (initscr)
@@ -169,7 +196,7 @@
   (define (rfc-loop)
     ;; Only redraw if the action taken was movement.
     ;; Other keys don't result in a redraw.
-    (if (moved? robot) (draw-robot))
+    (if (moved? robot) (draw-robot robot))
 
     (case (getch)
       ((#\q #\Q KEY_F0)
@@ -198,7 +225,8 @@
   (define (rfc-win)
     ;; Clear the screen but redraw the frame.
     (clear)
-    (flushinp)                          ; stop taking input
+    ;; Stop taking input
+    (flushinp)
     (draw-frame)
 
     (mvprintw 1 (- (COLS) 9) "Aww...")
@@ -211,8 +239,8 @@
     (row-set! chicken 1)
     (col-set! chicken (- (quotient (COLS) 2) 5))
 
-    (draw-robot)
-    (draw-chicken)
+    (draw-robot robot)
+    (draw-chicken chicken)
     (draw-items items)                  ; let the items remain
 
     ;; Step by step / Move a little closer to me
@@ -221,8 +249,8 @@
        (thread-sleep! 0.8)
        (move-robot h: 'left)
        (col-set! chicken (add1 (col chicken)))
-       (draw-robot)
-       (draw-chicken)
+       (draw-robot robot)
+       (draw-chicken chicken)
        (mvaddch (row chicken) (sub1 (col chicken)) #\ )
        (refresh))
      4)
@@ -237,6 +265,7 @@
     (mvprintw (- (LINES) 2) (- (COLS) 24) "Press R to play again.")
     (attroff (COLOR_PAIR *help-colour*))
 
+    (flushinp)
     (refresh)
     (thread-sleep! 1)
 
