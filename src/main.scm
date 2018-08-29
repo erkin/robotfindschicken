@@ -6,11 +6,14 @@
 (import rfc-draw)
 (import rfc-game)
 
+(define layout-arg 'numpad)
+
 (define (rfc-usage)
   (print "Usage: rfc [-n ITEMS]")
-  (print "  --help        Display this help message")
-  (print "  --items ITEMS Play the game with ITEMS number of items")
-  (print "  --version     Display version and licence information")
+  (print "  --help, -?, -h              Display this help message")
+  (print "  --items ITEMS, -n ITEMS     Play the game with ITEMS number of items")
+  (print "  --layout LAYOUT, -l LAYOUT  Switch keyboard layout to LAYOUT (default: numpad)")
+  (print "  --version, -v, -V           Display version and licence information")
   (exit))
 
 (define (rfc-version)
@@ -23,7 +26,7 @@
   (print  "you can obtain one at https://mozilla.org/MPL/2.0/")
   (exit))
 
-(define (rfc-options args)
+(define (main args)
   (define (rfc-items rest)
     (if (null? rest)
         (rfc-usage))
@@ -36,28 +39,33 @@
        ((and
          (exact? n)
          (> n 0))
-        (set! item-count n)
-        (rfc-init))
+        (set! item-count n))
        (else
         (print "Not a suitable number: " n)
         (print "Ignoring...")
-        (newline)
-        (rfc-init)))))
+        (newline)))))
 
+  (if (null? args)
+      (rfc-init layout-arg))
+
+  ;; A (case) would've normally sufficed but since it uses (eq?)
+  ;; strings don't match.
   (let ((arg (car args)))
     (cond
-     ((member arg '("-h" "-H" "-?" "--help" "-help"))
+     ((member arg '("-h" "-?" "--help" "-help"))
       (rfc-usage))
      ((member arg '("-v" "-V" "--version" "-version"))
       (rfc-version))
-     ((member arg '("-n" "-N" "--items" "-items"))
-      (rfc-items (cdr args)))
+     ((member arg '("-n" "--items" "-items"))
+      (rfc-items (cadr args))
+      (main (cddr args)))
+     ((member arg '("-l" "--layout"))
+      (when (null? (cdr args))
+        (print "This option needs an argument.")
+        (exit 1))
+      (set! layout-arg (string->symbol (cadr args)))
+      (main (cddr args)))
      (else
       (rfc-usage)))))
-
-(define (main args)
-  (if (null? args)
-      (rfc-init)
-      (rfc-options args)))
 
 (main (command-line-arguments))

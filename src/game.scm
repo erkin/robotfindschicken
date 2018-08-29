@@ -6,6 +6,7 @@
   (import chicken scheme)
   (require-extension (only srfi-18 thread-sleep!))
   (require-extension (only srfi-13 string-take))
+  (use (only data-structures alist-ref ->string compose))
   (use (only extras fprintf))
   (use ncurses)
 
@@ -15,12 +16,22 @@
 
   (define items '())
   (define item-count #f)
-
   (define robot #f)
   (define chicken #f)
 
+;;; Numpad is default
+  (define layout
+    '((up-char    . #\8)
+      (down-char  . #\2)
+      (left-char  . #\4)
+      (right-char . #\6)
+      (up-left-char    . #\7)
+      (up-right-char   . #\9)
+      (down-left-char  . #\1)
+      (down-right-char . #\3)))
 
-;;;; In-game procedures
+
+;;;; Internal procedures
   
   (define (quit-game message code)
     ;; Stop input to avoid cluttering the terminal.
@@ -33,7 +44,68 @@
       ;; Quit with an error.
       (exit code))
     (print message)
+    (newline)
     (exit))
+
+  (define (layout-ref key)
+    (alist-ref key layout))
+
+  ;; TODO: Is there a simpler way to do this?
+  (define (switch-layout new-layout)
+    (set! layout
+      (case new-layout
+        ((qwerty azerty qwertz)
+         `((up-char    . #\k)
+           (down-char  . #\j)
+           (left-char  . #\h)
+           (right-char . #\l)
+           `(up-left-char . ,(if (eqv? layout 'qwertz) #\z #\y))
+           (up-right-char   . #\u)
+           (down-left-char  . #\b)
+           (down-right-char . #\n)))
+        ((dvorak svorak)
+         '((up-char    . #\t)
+           (down-char  . #\h)
+           (left-char  . #\d)
+           (right-char . #\n)
+           (up-left-char    . #\f)
+           (up-right-char   . #\g)
+           (down-left-char  . #\x)
+           (down-right-char . #\b)))
+        ((colemak)
+         '((up-char    . #\e)
+           (down-char  . #\n)
+           (left-char  . #\h)
+           (right-char . #\i)
+           (up-left-char    . #\j)
+           (up-right-char   . #\l)
+           (down-left-char  . #\b)
+           (down-right-char . #\k)))
+        ((workman)
+         '((up-char    . #\e)
+           (down-char  . #\n)
+           (left-char  . #\y)
+           (right-char . #\o)
+           (up-left-char    . #\j)
+           (up-right-char   . #\f)
+           (down-left-char  . #\v)
+           (down-right-char . #\k)))
+        ((f)
+         '((up-char    . #\m)
+           (down-char  . #\k)
+           (left-char  . #\t)
+           (right-char . #\l)
+           (up-left-char    . #\d)
+           (up-right-char   . #\r)
+           (down-left-char  . #\ç)
+           (down-right-char . #\z)))
+        ((numpad)
+         layout)
+        (else
+         (quit-game "Invalid layout name." 1)))))
+
+
+;;;; Movement procedures
 
   (define (check-position return)
     (define (check-item-position items)
@@ -119,7 +191,9 @@
     (attroff (COLOR_PAIR *help-colour*))
     
     (attron (COLOR_PAIR *control-colour*))
-    (mvprintw (- (LINES) 4) 6 "7 8 9")
+    ;; TODO: whatever the fuck this is
+    (mvprintw (- (LINES) 4) 6
+              (string-append (apply string-append (map (compose ->string layout-ref) '(up-left-char up-char up-right-char)))))
     (mvprintw (- (LINES) 3) 6 "4   6")
     (mvprintw (- (LINES) 2) 6 "1 2 3")
     (attroff (COLOR_PAIR *control-colour*))
@@ -141,8 +215,9 @@
     (draw-robot robot)
     (draw-chicken chicken))
 
-  (define (rfc-init)
+  (define (rfc-init layout)
     (initscr)
+    (switch-layout layout)
 
     (if (not (has_colors))
         (quit-game "Your terminal does not support colours." 1))
@@ -186,7 +261,7 @@
     (set! chicken (car (generate-items 2)))
 
     (attron (COLOR_PAIR *message-colour*))
-    (mvprintw 1 (- (COLS) 32) "Press H any time to view help.")
+    (mvprintw 1 (- (COLS) 32) "Press ? any time to view help.")
     (centre-message "You are the Robot!" "Find the Chicken!" "Godspeed!")
     (attroff (COLOR_PAIR *message-colour*))
 
@@ -198,26 +273,27 @@
     ;; Other keys don't result in a redraw.
     (if (moved? robot) (draw-robot robot))
 
-    (case (getch)
+    ;; (case) does not evaluate values...
+    (select (getch)
       ((#\q #\Q KEY_F0)
        (quit-game "You couldn't find the Chicken. Sad!" 0))
-      ((#\8 KEY_UP)
+      (((layout-ref 'up-char) KEY_UP)
        (move-robot v: 'up))
-      ((#\9)
+      (((layout-ref 'up-right-char))
        (move-robot v: 'up h: 'right))
-      ((#\6 KEY_RIGHT)
+      (((layout-ref 'right-char) KEY_RIGHT)
        (move-robot h: 'right))
-      ((#\3)
+      (((layout-ref 'down-right-char))
        (move-robot v: 'down h: 'right))
-      ((#\2 KEY_DOWN)
+      (((layout-ref 'down-char) KEY_DOWN)
        (move-robot v: 'down))
-      ((#\1)
+      (((layout-ref 'down-left-char))
        (move-robot v: 'down h: 'left))
-      ((#\4 KEY_LEFT)
+      (((layout-ref 'left-char) KEY_LEFT)
        (move-robot h: 'left))
-      ((#\7)
+      (((layout-ref 'up-left-char))
        (move-robot v: 'up h: 'left))
-      ((#\h #\H KEY_F1 KEY_HELP)
+      ((#\? KEY_HELP)
        (rfc-splash)))
 
     (rfc-loop))
@@ -261,19 +337,19 @@
     (centre-message "You found the Chicken!" "Good Robot!")
     (attroff (COLOR_PAIR *message-colour*))
 
-    (attron (COLOR_PAIR *help-colour*))
-    (mvprintw (- (LINES) 2) (- (COLS) 24) "Press R to play again.")
-    (attroff (COLOR_PAIR *help-colour*))
+    ;; (attron (COLOR_PAIR *help-colour*))
+    ;; (mvprintw (- (LINES) 2) (- (COLS) 24) "Press R to play again.")
+    ;; (attroff (COLOR_PAIR *help-colour*))
 
     (flushinp)
     (refresh)
     (thread-sleep! 1)
 
-    ;; Play again.
-    (when (member (getch) '(#\r #\R))
-      (clear)
-      (endwin)
-      (rfc-init))
+    ;; ;; Play again.
+    ;; (when (member (getch) '(#\r #\R))
+    ;;   (clear)
+    ;;   (endwin)
+    ;;   (rfc-init))
 
     ;; Exit on any other key.
     (quit-game "Thanks for playing!" 0)))

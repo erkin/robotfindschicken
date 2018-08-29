@@ -16,7 +16,7 @@
            (f)
            (repeat f (sub1 n))))))
 
-
+  
 ;;;; Constant values
 
   (define *frame-colour*   1)
