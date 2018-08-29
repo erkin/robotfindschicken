@@ -1,4 +1,4 @@
-* robotfindschicken v1.-1.23
+* robotfindschicken v1.-1.69
   A [[https://call-cc.org/][Galloschematic]] clone of beloved [[http://robotfindskitten.org/][robotfindskitten]].
 
 ** Frequently asked questions
