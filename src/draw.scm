@@ -5,7 +5,8 @@
   (import (only data-structures compose intersperse))
   (use ncurses utf8)
 
-  (import rfc-const rfc-internal)
+  (import rfc-const
+          rfc-internal)
 
 ;;;; Drawing procedures
 
@@ -23,7 +24,7 @@
   (define (draw-layout line keys spacing)
     (mvprintw
      (- (LINES) line) 6
-     (apply string-append (intersperse (map (compose ->string layout-ref) keys) spacing))))
+     (apply string-append (intersperse (map (compose string layout-ref) keys) spacing))))
   
 ;;; Draw non-robot non-chicken items
   (define (draw-items item-list)

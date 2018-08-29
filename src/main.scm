@@ -1,6 +1,6 @@
-(import rfc-const)
-(import rfc-draw)
-(import rfc-game)
+(import rfc-const
+        rfc-draw
+        rfc-game)
 
 (define layout-arg 'numpad)
 
