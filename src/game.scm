@@ -3,11 +3,10 @@
 (declare (uses rfc-draw))
 
 (module rfc-game *
-  (import chicken scheme)
+  (import chicken scheme data-structures)
+  (import (only extras fprintf))
   (require-extension (only srfi-18 thread-sleep!))
   (require-extension (only srfi-13 string-take))
-  (use (only data-structures alist-ref ->string compose))
-  (use (only extras fprintf))
   (use ncurses)
 
   (import rfc-const rfc-draw)
@@ -18,91 +17,6 @@
   (define item-count #f)
   (define robot #f)
   (define chicken #f)
-
-;;; Numpad is default
-  (define layout
-    '((up-char    . #\8)
-      (down-char  . #\2)
-      (left-char  . #\4)
-      (right-char . #\6)
-      (up-left-char    . #\7)
-      (up-right-char   . #\9)
-      (down-left-char  . #\1)
-      (down-right-char . #\3)))
-
-
-;;;; Internal procedures
-  
-  (define (quit-game message code)
-    ;; Stop input to avoid cluttering the terminal.
-    (flushinp)
-    (attroff A_BOLD)
-    (clear)
-    (endwin)
-    (unless (zero? code)
-      (fprintf (current-error-port) message)
-      ;; Quit with an error.
-      (exit code))
-    (print message)
-    (newline)
-    (exit))
-
-  (define (layout-ref key)
-    (alist-ref key layout))
-
-  ;; TODO: Is there a simpler way to do this?
-  (define (switch-layout new-layout)
-    (set! layout
-      (case new-layout
-        ((qwerty azerty qwertz)
-         `((up-char    . #\k)
-           (down-char  . #\j)
-           (left-char  . #\h)
-           (right-char . #\l)
-           `(up-left-char . ,(if (eqv? layout 'qwertz) #\z #\y))
-           (up-right-char   . #\u)
-           (down-left-char  . #\b)
-           (down-right-char . #\n)))
-        ((dvorak svorak)
-         '((up-char    . #\t)
-           (down-char  . #\h)
-           (left-char  . #\d)
-           (right-char . #\n)
-           (up-left-char    . #\f)
-           (up-right-char   . #\g)
-           (down-left-char  . #\x)
-           (down-right-char . #\b)))
-        ((colemak)
-         '((up-char    . #\e)
-           (down-char  . #\n)
-           (left-char  . #\h)
-           (right-char . #\i)
-           (up-left-char    . #\j)
-           (up-right-char   . #\l)
-           (down-left-char  . #\b)
-           (down-right-char . #\k)))
-        ((workman)
-         '((up-char    . #\e)
-           (down-char  . #\n)
-           (left-char  . #\y)
-           (right-char . #\o)
-           (up-left-char    . #\j)
-           (up-right-char   . #\f)
-           (down-left-char  . #\v)
-           (down-right-char . #\k)))
-        ((f)
-         '((up-char    . #\m)
-           (down-char  . #\k)
-           (left-char  . #\t)
-           (right-char . #\l)
-           (up-left-char    . #\d)
-           (up-right-char   . #\r)
-           (down-left-char  . #\ç)
-           (down-right-char . #\z)))
-        ((numpad)
-         layout)
-        (else
-         (quit-game "Invalid layout name." 1)))))
 
 
 ;;;; Movement procedures
@@ -180,6 +94,9 @@
 ;;;; Game sections
 
   (define (rfc-splash)
+    (define (draw-layout line keys spacing)
+      (mvprintw (- (LINES) line) 6
+                (apply string-append (intersperse (map (compose ->string layout-ref) keys) spacing))))
     (draw-frame)
     ;; The ordering is important to avoid overwriting
     ;; some parts with whitespace.
@@ -191,11 +108,9 @@
     (attroff (COLOR_PAIR *help-colour*))
     
     (attron (COLOR_PAIR *control-colour*))
-    ;; TODO: whatever the fuck this is
-    (mvprintw (- (LINES) 4) 6
-              (string-append (apply string-append (map (compose ->string layout-ref) '(up-left-char up-char up-right-char)))))
-    (mvprintw (- (LINES) 3) 6 "4   6")
-    (mvprintw (- (LINES) 2) 6 "1 2 3")
+    (draw-layout 2 '(down-left-char down-char down-right-char) " ")
+    (draw-layout 3 '(left-char right-char) "   ")
+    (draw-layout 4 '(up-left-char up-char up-right-char) " ")
     (attroff (COLOR_PAIR *control-colour*))
 
     (attron (COLOR_PAIR *message-colour*))
