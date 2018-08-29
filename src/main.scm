@@ -1,7 +1,3 @@
-(declare (uses rfc-const))
-(declare (uses rfc-draw))
-(declare (uses rfc-game))
-
 (import rfc-const)
 (import rfc-draw)
 (import rfc-game)

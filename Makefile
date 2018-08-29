@@ -1,13 +1,15 @@
 CC := csc
-DEBUG_OPTS := -d2 -O0
+
 OPTS := -d0 -O2
+BUILD_OPTS := -c -J
+DEBUG_OPTS := -d2 -O0
 
 CSC := $(CC) $(DEBUG_OPTS)
 
-TARGET := rfc
-
 SRCDIR := src
 BUILDDIR := build
+
+TARGET := rfc
 
 all: build clean
 
@@ -20,20 +22,21 @@ clean:
 run: $(TARGET)
 	./$(TARGET)
 
-.PHONY: all build clean run
+
+.PHONY: all build clean run static
 
 
 $(BUILDDIR)/const.o: $(SRCDIR)/const.scm
-	$(CSC) -c -J -o $(BUILDDIR)/const.o $(SRCDIR)/const.scm
+	$(CSC) $(BUILD_OPTS) -o $(BUILDDIR)/const.o $(SRCDIR)/const.scm -unit const
 
 $(BUILDDIR)/internal.o: $(SRCDIR)/internal.scm $(BUILDDIR)/const.o
-	$(CSC) -c -J -o $(BUILDDIR)/internal.o $(SRCDIR)/internal.scm
+	$(CSC) $(BUILD_OPTS) -o $(BUILDDIR)/internal.o $(SRCDIR)/internal.scm -unit internal -uses const
 
 $(BUILDDIR)/draw.o: $(SRCDIR)/draw.scm $(BUILDDIR)/const.o $(BUILDDIR)/internal.o
-	$(CSC) -c -J -o $(BUILDDIR)/draw.o $(SRCDIR)/draw.scm
+	$(CSC) $(BUILD_OPTS) -o $(BUILDDIR)/draw.o $(SRCDIR)/draw.scm -unit draw -uses internal -uses const
 
 $(BUILDDIR)/game.o: $(SRCDIR)/game.scm $(BUILDDIR)/draw.o $(BUILDDIR)/internal.o $(BUILDDIR)/const.o
-	$(CSC) -c -J -o $(BUILDDIR)/game.o $(SRCDIR)/game.scm
+	$(CSC) $(BUILD_OPTS) -o $(BUILDDIR)/game.o $(SRCDIR)/game.scm -unit game -uses draw -uses internal -uses const
 
 $(TARGET): $(SRCDIR)/main.scm $(BUILDDIR)/game.o $(BUILDDIR)/draw.o $(BUILDDIR)/internal.o $(BUILDDIR)/const.o
-	$(CSC) $^ -o $@
+	$(CSC) $^ -o $@ -uses game -uses draw -uses internal -uses const

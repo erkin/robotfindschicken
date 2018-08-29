@@ -1,5 +1,4 @@
-(declare (unit rfc-internal))
-(declare (uses rfc-const))
+;;;; Herein lie internal procedures
 
 (module rfc-internal *
   (import chicken scheme)

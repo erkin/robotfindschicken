@@ -1,10 +1,5 @@
 ;;;; Herein lie game mechanics
 
-(declare (unit rfc-game))
-(declare (uses rfc-const))
-(declare (uses rfc-internal))
-(declare (uses rfc-draw))
-
 (module rfc-game *
   (import chicken scheme)
   (require-extension (only srfi-18 thread-sleep!))

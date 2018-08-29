@@ -1,9 +1,5 @@
 ;;;; Herein lie ncurses drawing procedures
 
-(declare (unit rfc-draw))
-(declare (uses rfc-const))
-(declare (uses rfc-internal))
-
 (module rfc-draw *
   (import chicken scheme)
   (import (only data-structures compose intersperse))

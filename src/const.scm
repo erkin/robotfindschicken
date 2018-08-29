@@ -1,7 +1,5 @@
 ;;;; Herein lie global variables and constants and record definitions
 
-(declare (unit rfc-const))
-
 (module rfc-const *
   (import chicken scheme)
   (use utf8)
