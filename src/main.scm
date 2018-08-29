@@ -20,7 +20,8 @@
   (exit))
 
 (define (rfc-version)
-  (print   "robotfindschicken v1.-1.5")
+  (print   "robotfindschicken v1.-1.69")
+  (print   "https://github.com/erkin/robotfindschicken")
   (print   "Copyright (C) 2018 Erkin Batu Altunbaş")
   (newline)
   (print* "Each file of this project's source code is subject ")
