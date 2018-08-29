@@ -1,4 +1,8 @@
-CSC := csc -d2 -O0
+CC := csc
+DEBUG_OPTS := -d2 -O0
+OPTS := -d0 -O2
+
+CSC := $(CC) $(OPTS)
 
 TARGET := rfc
 
@@ -22,11 +26,14 @@ run: $(TARGET)
 $(BUILDDIR)/const.o: $(SRCDIR)/const.scm
 	$(CSC) -c -J -o $(BUILDDIR)/const.o $(SRCDIR)/const.scm
 
-$(BUILDDIR)/draw.o: $(SRCDIR)/draw.scm $(BUILDDIR)/const.o
+$(BUILDDIR)/internal.o: $(SRCDIR)/internal.scm $(BUILDDIR)/const.o
+	$(CSC) -c -J -o $(BUILDDIR)/internal.o $(SRCDIR)/internal.scm
+
+$(BUILDDIR)/draw.o: $(SRCDIR)/draw.scm $(BUILDDIR)/const.o $(BUILDDIR)/internal.o
 	$(CSC) -c -J -o $(BUILDDIR)/draw.o $(SRCDIR)/draw.scm
 
-$(BUILDDIR)/game.o: $(SRCDIR)/game.scm $(BUILDDIR)/draw.o $(BUILDDIR)/const.o
+$(BUILDDIR)/game.o: $(SRCDIR)/game.scm $(BUILDDIR)/draw.o $(BUILDDIR)/internal.o $(BUILDDIR)/const.o
 	$(CSC) -c -J -o $(BUILDDIR)/game.o $(SRCDIR)/game.scm
 
-$(TARGET): $(SRCDIR)/main.scm $(BUILDDIR)/game.o $(BUILDDIR)/draw.o $(BUILDDIR)/const.o
+$(TARGET): $(SRCDIR)/main.scm $(BUILDDIR)/game.o $(BUILDDIR)/draw.o $(BUILDDIR)/internal.o $(BUILDDIR)/const.o
 	$(CSC) $^ -o $@

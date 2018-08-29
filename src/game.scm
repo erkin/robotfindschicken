@@ -1,57 +1,21 @@
+;;;; Herein lie game mechanics
+
 (declare (unit rfc-game))
 (declare (uses rfc-const))
+(declare (uses rfc-internal))
 (declare (uses rfc-draw))
 
 (module rfc-game *
-  (import chicken scheme data-structures)
-  (import (only extras fprintf))
+  (import chicken scheme)
   (require-extension (only srfi-18 thread-sleep!))
-  (require-extension (only srfi-13 string-take))
   (use ncurses)
 
-  (import rfc-const rfc-draw)
-
-;;;; Global values
-
-  (define items '())
-  (define item-count #f)
-  (define robot #f)
-  (define chicken #f)
+  (import rfc-const
+          rfc-internal
+          rfc-draw)
 
 
 ;;;; Movement procedures
-
-  (define (check-position return)
-    (define (check-item-position items)
-      (when (pair? items)
-        (let ((item (car items)))
-          ;; You bumped into an item
-          (when (and (= (row item) (row robot))
-                     (= (col item) (col robot)))
-            ;; Clip the message string if it's too long.
-            (if (>= (string-length (message item)) (- (COLS) 3))
-                (begin
-                  (mvprintw 1 2 (string-take (message item) (- (COLS) 5)))
-                  (addch (ACS_RARROW)) (addch (ACS_RARROW)))
-                (mvprintw 1 2 (message item))) ; Print item's message
-            (row-set! robot (row-prev robot))
-            (col-set! robot (col-prev robot))
-            (return #f)))
-        (check-item-position (cdr items)))) ; Or was it another item?
-
-    ;; Is it the chicken?
-    (if (and (= (col chicken) (col robot))
-             (= (row chicken) (row robot)))
-        ;; Way to go!
-        (rfc-win))
-
-    ;; Was it an item?
-    ;; Let's inefficiently check all of them.
-    (check-item-position items)
-
-    ;; Nope, you're clear.
-    (return #t))
-
 
   (define (move-robot #!key (v 'nil) (h 'nil))
     ;; Erase the message line
@@ -86,17 +50,16 @@
             (col-set! robot 1)))
 
     ;; Did we move or bump into something?
-    (moved! robot
-            (call-with-current-continuation
-             (lambda (return) (check-position return)))))
+    (case (call-with-current-continuation
+           (lambda (return) (check-position return)))
+      ((bump) (moved! robot #f))
+      ((move) (moved! robot #t))
+      ((cluck) (rfc-win))))
 
 
 ;;;; Game sections
 
   (define (rfc-splash)
-    (define (draw-layout line keys spacing)
-      (mvprintw (- (LINES) line) 6
-                (apply string-append (intersperse (map (compose ->string layout-ref) keys) spacing))))
     (draw-frame)
     ;; The ordering is important to avoid overwriting
     ;; some parts with whitespace.

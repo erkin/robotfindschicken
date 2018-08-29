@@ -1,11 +1,15 @@
+;;;; Herein lie ncurses drawing procedures
+
 (declare (unit rfc-draw))
 (declare (uses rfc-const))
+(declare (uses rfc-internal))
 
 (module rfc-draw *
   (import chicken scheme)
-  (use ncurses)
+  (import (only data-structures compose intersperse))
+  (use ncurses utf8)
 
-  (import rfc-const)
+  (import rfc-const rfc-internal)
 
 ;;;; Drawing procedures
 
@@ -19,6 +23,12 @@
         (centre-message-iter (cdr messages) (add1 n))))
     (centre-message-iter messages 0))
 
+;;; Draw keyboard layout on the help screen
+  (define (draw-layout line keys spacing)
+    (mvprintw
+     (- (LINES) line) 6
+     (apply string-append (intersperse (map (compose ->string layout-ref) keys) spacing))))
+  
 ;;; Draw non-robot non-chicken items
   (define (draw-items item-list)
     (unless (null? item-list)

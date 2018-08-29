@@ -14,6 +14,13 @@
   (print "  --items ITEMS, -n ITEMS     Play the game with ITEMS number of items")
   (print "  --layout LAYOUT, -l LAYOUT  Switch keyboard layout to LAYOUT (default: numpad)")
   (print "  --version, -v, -V           Display version and licence information")
+  (newline)
+  (print* "Available layouts are: ")
+  (print* "qwerty/qwertz/azerty, ")
+  (print* "[numpad], ")
+  (print* "dvorak/svorak, ")
+  (print* "f, ")
+  (print "workman")
   (exit))
 
 (define (rfc-version)

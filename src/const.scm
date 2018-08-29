@@ -1,13 +1,20 @@
-;;; TODO: come up with a better name and grouping
+;;;; Herein lie global variables and constants and record definitions
+
 (declare (unit rfc-const))
 
 (module rfc-const *
   (import chicken scheme)
-  (import (only extras fprintf random))
-  (import (only data-structures alist-ref))
-  (use ncurses)
 
-;;;; Default layout (numpad)
+
+;;;; Global variables to be changed
+
+  (define items '())
+  (define item-count #f)
+  (define robot #f)
+  (define chicken #f)
+
+;;; Default layout (numpad)
+
   (define layout
     '((up-char    . #\8)
       (down-char  . #\2)
@@ -18,88 +25,6 @@
       (down-left-char  . #\1)
       (down-right-char . #\3)))
   
-;;;; Preliminary procedures
-
-;;; Run the procedure f n times
-  (define (repeat f n)
-    (if (= n 1)
-        (f)
-        ((lambda ()
-           (f)
-           (repeat f (sub1 n))))))
-
-;;;; Internal procedures  
-
-  (define (quit-game message code)
-    ;; Stop input to avoid cluttering the terminal.
-    (flushinp)
-    (attroff A_BOLD)
-    (clear)
-    (endwin)
-    (unless (zero? code)
-      (fprintf (current-error-port) message)
-      ;; Quit with an error.
-      (exit code))
-    (print message)
-    (exit))
-
-  (define (layout-ref key)
-    (alist-ref key layout))
-
-  ;; TODO: Is there a simpler way to do this?
-  (define (switch-layout new-layout)
-    (set! layout
-      (case new-layout
-        ((qwerty azerty qwertz)
-         `((up-char    . #\k)
-           (down-char  . #\j)
-           (left-char  . #\h)
-           (right-char . #\l)
-           (up-left-char . ,(if (eqv? layout 'qwertz) #\z #\y))
-           (up-right-char   . #\u)
-           (down-left-char  . #\b)
-           (down-right-char . #\n)))
-        ((dvorak svorak)
-         '((up-char    . #\t)
-           (down-char  . #\h)
-           (left-char  . #\d)
-           (right-char . #\n)
-           (up-left-char    . #\f)
-           (up-right-char   . #\g)
-           (down-left-char  . #\x)
-           (down-right-char . #\b)))
-        ((colemak)
-         '((up-char    . #\e)
-           (down-char  . #\n)
-           (left-char  . #\h)
-           (right-char . #\i)
-           (up-left-char    . #\j)
-           (up-right-char   . #\l)
-           (down-left-char  . #\b)
-           (down-right-char . #\k)))
-        ((workman)
-         '((up-char    . #\e)
-           (down-char  . #\n)
-           (left-char  . #\y)
-           (right-char . #\o)
-           (up-left-char    . #\j)
-           (up-right-char   . #\f)
-           (down-left-char  . #\v)
-           (down-right-char . #\k)))
-        ((f)
-         '((up-char    . #\m)
-           (down-char  . #\k)
-           (left-char  . #\t)
-           (right-char . #\l)
-           (up-left-char    . #\d)
-           (up-right-char   . #\r)
-           (down-left-char  . #\ç)
-           (down-right-char . #\z)))
-        ((numpad)
-         layout)
-        (else
-         (quit-game "Invalid layout name.\n" 1)))))
-
 
 ;;;; Constant values
 
@@ -159,8 +84,7 @@
       #\/ #\= #\? #\+ #\- #\_ #\\
       #\| #\' #\, #\. #\; #\: #\"
       #\< #\> #\` #\~))
-
-
+  
 ;;;; Record definitions
 
   (define-record item
@@ -180,26 +104,4 @@
     (item-message message message-set!)
     (item-colour colour colour-set!)
     (item-char char char-set!)
-    (moved moved? moved!))
-
-
-;;;; Internal procedures
-
-;;; Get random coordinates
-  (define (random-row)
-    (+ 3 (random (- (LINES) 5))))
-  (define (random-col)
-    (+ 1 (random (- (COLS) 2))))
-  (define (random-elem lst)
-    (list-ref lst (random (length lst))))
-
-;;; Generate a number of locations to place non-robot non-chicken items
-  (define (generate-items count)
-    (if (not (zero? (sub1 count)))
-        (cons (spawn-item
-               (random-row) (random-col) 0 0
-               #f (random-elem messages)
-               (add1 (random 7))        ; Random colour
-               (random-elem chars))
-              (generate-items (sub1 count)))
-        '())))
+    (moved moved? moved!)))
