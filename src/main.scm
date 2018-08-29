@@ -1,15 +1,15 @@
-#!/usr/bin/csi -s
-(use ncurses)
-(require-extension srfi-9)
-(require-extension srfi-13)
-(require-extension srfi-18)
+(declare (uses rfc-const))
+(declare (uses rfc-draw))
+(declare (uses rfc-game))
 
-(include "const.scm")
-(include "draw.scm")
-(include "move.scm")
-(include "game.scm")
+;; (require-extension srfi-9)
+;; (require-extension srfi-13)
+;; (require-extension srfi-18)
 
-;;;; Main
+(import rfc-const)
+(import rfc-draw)
+(import rfc-move)
+(import rfc-game)
 
 (define (rfc-usage)
   (print "Usage: rfc [-n ITEMS]")
@@ -66,5 +66,3 @@
       (rfc-options args)))
 
 (main (command-line-arguments))
-
-;;;;
