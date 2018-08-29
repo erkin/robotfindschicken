@@ -81,7 +81,7 @@
     (attroff (COLOR_PAIR *message-colour*))
 
     ;; Mock the player for exiting on help screen.
-    (if (member (getch) '(#\q #\Q KEY_F0))
+    (if (member (getch) '(#\q #\Q KEY_F0 KEY_EXIT KEY_CLOSE))
         (quit-game "That was quick." 0))
 
     ;; Now that the player pressed a key, clear the screen.
@@ -153,7 +153,7 @@
 
     ;; (case) does not evaluate values...
     (select (getch)
-      ((#\q #\Q KEY_F0)
+      ((#\q #\Q KEY_F0 KEY_EXIT KEY_CLOSE)
        (quit-game "You couldn't find the Chicken. Sad!" 0))
       (((layout-ref 'up-char) KEY_UP)
        (move-robot v: 'up))
@@ -215,19 +215,20 @@
     (centre-message "You found the Chicken!" "Good Robot!")
     (attroff (COLOR_PAIR *message-colour*))
 
-    ;; (attron (COLOR_PAIR *help-colour*))
-    ;; (mvprintw (- (LINES) 2) (- (COLS) 24) "Press R to play again.")
-    ;; (attroff (COLOR_PAIR *help-colour*))
+    (attron (COLOR_PAIR *help-colour*))
+    (mvprintw (- (LINES) 2) (- (COLS) 24) "Press R to play again.")
+    (attroff (COLOR_PAIR *help-colour*))
 
     (flushinp)
     (refresh)
-    (thread-sleep! 1)
+    (thread-sleep! 2)
 
-    ;; ;; Play again.
-    ;; (when (member (getch) '(#\r #\R))
-    ;;   (clear)
-    ;;   (endwin)
-    ;;   (rfc-init))
+    ;; Play again.
+    (when (member (getch) '(#\r #\R))
+      (clear)
+      (endwin)
+      (rfc-init))
 
+    (beep)
     ;; Exit on any other key.
     (quit-game "Thanks for playing!" 0)))

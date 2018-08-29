@@ -4,7 +4,7 @@
 
 (module rfc-const *
   (import chicken scheme)
-
+  (use utf8)
 
 ;;;; Global variables to be changed
 

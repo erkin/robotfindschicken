@@ -21,9 +21,10 @@
 
 *** I sure would love to "play" this "game"!
     Why you're in luck today! You just need to
-    =chicken-install -s ncurses= to obtain the bindings, =mkdir build=
-    here and build it with =make all=, and bam! Bob's your uncle!
-    Then you can just =./rfc= and enjoy the ride. Bon voyage!
+    =chicken-install -s ncurses utf8= to obtain the bindings,
+    =mkdir build= here and build it with =make all=, and bam! Bob's
+    your uncle! Then you can just =./rfc= and enjoy the ride.
+    Bon voyage!
 
 *** My my, I believe I just found chicken!
     Well done, old sport! Well done!

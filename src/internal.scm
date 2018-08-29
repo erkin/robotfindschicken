@@ -2,8 +2,10 @@
 (declare (uses rfc-const))
 
 (module rfc-internal *
-  (import chicken scheme extras data-structures)
-  (require-extension (only srfi-13 string-take))
+  (import chicken scheme)
+  (import (only data-structures alist-ref))
+  (import (only extras fprintf random))
+  (require-extension (only utf8-srfi-13 string-take))
   (use ncurses)
 
   (import rfc-const)
@@ -29,12 +31,14 @@
           ;; You bumped into an item
           (when (and (= (row item) (row robot))
                      (= (col item) (col robot)))
+            (attroff A_BOLD)
             ;; Clip the message string if it's too long.
             (if (>= (string-length (message item)) (- (COLS) 3))
                 (begin
                   (mvprintw 1 2 (string-take (message item) (- (COLS) 5)))
                   (addch (ACS_RARROW)) (addch (ACS_RARROW)))
                 (mvprintw 1 2 (message item))) ; Print item's message
+            (attron A_BOLD)
             (row-set! robot (row-prev robot))
             (col-set! robot (col-prev robot))
             (return 'bump)))

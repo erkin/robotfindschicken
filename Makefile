@@ -2,7 +2,7 @@ CC := csc
 DEBUG_OPTS := -d2 -O0
 OPTS := -d0 -O2
 
-CSC := $(CC) $(OPTS)
+CSC := $(CC) $(DEBUG_OPTS)
 
 TARGET := rfc
 
