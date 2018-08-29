@@ -33,10 +33,10 @@ $(BUILDDIR)/internal.o: $(SRCDIR)/internal.scm $(BUILDDIR)/const.o
 	$(CSC) $(BUILD_OPTS) -o $(BUILDDIR)/internal.o $(SRCDIR)/internal.scm -unit internal -uses const
 
 $(BUILDDIR)/draw.o: $(SRCDIR)/draw.scm $(BUILDDIR)/const.o $(BUILDDIR)/internal.o
-	$(CSC) $(BUILD_OPTS) -o $(BUILDDIR)/draw.o $(SRCDIR)/draw.scm -unit draw -uses internal -uses const
+	$(CSC) $(BUILD_OPTS) -o $(BUILDDIR)/draw.o $(SRCDIR)/draw.scm -unit draw -uses internal,const
 
 $(BUILDDIR)/game.o: $(SRCDIR)/game.scm $(BUILDDIR)/draw.o $(BUILDDIR)/internal.o $(BUILDDIR)/const.o
-	$(CSC) $(BUILD_OPTS) -o $(BUILDDIR)/game.o $(SRCDIR)/game.scm -unit game -uses draw -uses internal -uses const
+	$(CSC) $(BUILD_OPTS) -o $(BUILDDIR)/game.o $(SRCDIR)/game.scm -unit game -uses draw,internal,const
 
 $(TARGET): $(SRCDIR)/main.scm $(BUILDDIR)/game.o $(BUILDDIR)/draw.o $(BUILDDIR)/internal.o $(BUILDDIR)/const.o
-	$(CSC) $^ -o $@ -uses game -uses draw -uses internal -uses const
+	$(CSC) $^ -o $@ -uses game,draw,internal,const
