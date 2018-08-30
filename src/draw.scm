@@ -3,7 +3,7 @@
 (module rfc-draw *
   (import chicken scheme)
   (import (only data-structures compose intersperse))
-  (use ncurses utf8)
+  (use ncurses)
 
   (import rfc-const
           rfc-internal)

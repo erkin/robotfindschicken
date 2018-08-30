@@ -4,7 +4,7 @@
   (import chicken scheme)
   (import (only data-structures alist-ref))
   (import (only extras fprintf random))
-  (require-extension (only utf8-srfi-13 string-take))
+  (require-extension (only srfi-13 string-take))
   (use ncurses)
 
   (import rfc-const)
