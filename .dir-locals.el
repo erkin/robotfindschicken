@@ -6,4 +6,5 @@
               ((geiser-scheme-implementation . chicken)
                (subdirs . t)))
  (makefile-mode .
-                ((indent-tabs-mode . t))))
+                ((indent-tabs-mode . t)
+                 (subdirs . t))))

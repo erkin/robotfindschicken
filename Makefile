@@ -25,8 +25,10 @@ clean:
 run: $(TARGET)
 	./$(TARGET)
 
+eggs:
+	chicken-install -s ncurses
 
-.PHONY: all build clean run static
+.PHONY: all build clean run eggs
 
 
 $(BUILDDIR)/const.o: $(SRCDIR)/const.scm
