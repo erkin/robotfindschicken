@@ -1,3 +1,4 @@
 rfc
-build/*
-RFC.AppDir/*
+build
+rfc.AppDir
+robotfindschicken.AppImage
