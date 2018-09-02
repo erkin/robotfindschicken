@@ -24,6 +24,9 @@ APP := robotfindschicken.AppImage
 
 .PHONY: all build clean run eggs app app_build app_clean app_run
 
+
+## Building normally
+
 all: build clean
 
 build: $(TARGET)
@@ -34,15 +37,15 @@ clean:
 	# csc emits import libraries in pwd
 	rm -f *.import.scm
 
-run: build clean
+run: all
 	./$(TARGET)
 
 eggs:
 	chicken-install -s ncurses
 
-###
+## Building AppImage
 
-app: $(APP) # app_clean
+app: $(APP) app_clean
 
 app_build: $(BUILDDIR)/$(PROJECT)
 	rm -f $^/*.import.so
@@ -56,10 +59,11 @@ app_clean: clean
 	rm -rf $(BUILDDIR)/$(PROJECT)
 	rm -rf $(PROJECT).AppDir
 
-app_run: $(APP) app_clean
+app_run: app
 	./$(APP)
 
 
+# Build the object files
 $(BUILDDIR)/const.o: $(SRCDIR)/const.scm
 	$(CSC) $(BUILD_OPTS) -o $@ $(SRCDIR)/const.scm -unit const
 
@@ -76,7 +80,7 @@ $(BUILDDIR)/objects.a: $(BUILDDIR)/game.o $(BUILDDIR)/draw.o $(BUILDDIR)/interna
 	$(AR) $@ $^
 
 
-# Build normally
+# Build executable
 $(TARGET): $(SRCDIR)/main.scm $(BUILDDIR)/objects.a
 	$(CSC) $^ -o $@ -uses game,draw,internal,const
 
@@ -98,6 +102,7 @@ $(APP): app_build
 	ln -s usr/bin/$(PROJECT) $(PROJECT).AppDir/AppRun
 	appimagetool $(PROJECT).AppDir $@
 	chmod +x $@
+
 
 # Local Variables:
 #   mode: makefile
