@@ -56,6 +56,7 @@
       "An ANSI-art picture of a naked man printed with a dot-matrix printer."
       "An ASCII-art picture of a naked person printed with a daisy-wheel printer."
       "An EBCDIC-art picture of a naked woman printed with a line printer."
+      "An IO monad. It's pulsating with an ominous energy."
       "An action figure of Guy Steele, 1:18 scale."
       "An electric cdr."
       "An empty set. It's barely visible."
@@ -64,12 +65,13 @@
       "A barbershop quartet arrangement of the Free Software Song."
       "A pin-up picture of Peter Landin."
       "A pencil sketch of Barbara Liskov."
-      "An encrypted message from Alice to Bob."
-      "A Maxwell's daemon. It looks busy."
+      "An abstract syntax tree. It needs pruning."
+      "An encrypted message from Alice to Bob. You feel dirty intercepting it."
+      "Maxwell's daemon. It's complaining about the weather."
       "Do you want your possessions identified? [ynq]"
       "Five tonnes of flax! Or is it hemp?"
       "It's a doorstopper with no door to stop."
-      "It's a sleeping daemon."
+      "It's a busy waiting daemon. It looks anxious."
       "One of Paul Graham's oil paintings."
       "There is absolutely nothing here.                       (fnord?)"
       "These are two bodies connected by a weightless string."
@@ -82,11 +84,15 @@
       "This is almost a chicken, but not quite. Try harder."
       "This is Coq. Don't confuse it with chicken."
       "This is a delimited continuation."
-      "This is a plush Beastie."
+      "This is a plush Beastie. It appears to have misplaced its fork."
       "This is an abstract factory."
       "This is an FPGA reimplementation of the Connection Machine."
+      "Why would you want to do that?"
+      "You come across a line printer, happily printing away the source of its drivers."
       "You found some slack."
-      "You have no idea what this it, but you hope it's not what it looks like."))
+      "You have no idea what this it, but you hope it's not what it looks like."
+      "You tripped on a null modem lying around. Ouch!"
+      "You stepped on a tarball! Yuck!"))
 
   (define chars
     '(#\! #\@ #\# #\$ #\% #\& #\*
