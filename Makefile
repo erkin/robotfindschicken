@@ -48,11 +48,9 @@ eggs:
 app: $(APP) app_clean
 
 app_build: $(BUILDDIR)/$(PROJECT)
-	rm -f $^/*.import.so
-	rm -f $^/*-info
-	strip $^/*.so $^/$(PROJECT)
-	mv $^/* $(PREFIX)/lib/
-	rmdir $^
+	mv $^/{$(PROJECT),libchicken.so.8,ncurses.so} $(PREFIX)/lib/
+	strip $(PREFIX)/lib/*
+	rm -rf $^
 
 app_clean: clean
 	rm -rf $(PREFIX)
