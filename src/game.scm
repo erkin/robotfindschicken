@@ -90,7 +90,9 @@
 
   (define (rfc-init layout)
     (initscr)
-    (switch-layout layout)
+
+    (if layout
+        (switch-layout layout))
 
     (if (not (has_colors))
         (quit-game "Your terminal does not support colours." 1))
@@ -222,7 +224,7 @@
     (when (member (getch) '(#\r #\R))
       (clear)
       (endwin)
-      (rfc-init))
+      (rfc-init #f))
 
     (beep)
     ;; Exit on any other key.

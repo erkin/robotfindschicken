@@ -90,8 +90,20 @@
       "Why would you want to do that?"
       "You come across a line printer, happily printing away the source of its drivers."
       "You found some slack."
-      "You have no idea what this it, but you hope it's not what it looks like."
+      "You have no idea what this is, but you hope it's not what it looks like."
       "You tripped on a null modem lying around. Ouch!"
+      "A spam postcard. It offers you to enlarge your mailbox."
+      "EICAR test file written on vellum in gothic script"
+      "A bowl of chicken nuggets. You start worrying that your quest is futile."
+      "A BSD daemon picture in the ICO format. Quite iconoclastic."
+      "Collector's edition of Robot Finds Chicken. Mint condition, unopened."
+      "QuickBasic implementation of Ada Lovelace's first program."
+      "A recording of the sound of one hand clapping. You don't find it enlightening."
+      "The definitive guide to avian search and rescue in terminal environments, second edition."
+      "This is a faifthul catalogue of the Library of Babel."
+      "The demonstration of the fallacy of the true catalogue of the Library of Babel."
+      "A chicken decoy. It looked convincing from a distance."
+      "A fertilized egg. You can cheat by waiting for it to hatch if you are tired of searching."
       "You stepped on a tarball! Yuck!"))
 
   (define chars
