@@ -1,6 +1,11 @@
-(import rfc-const
-        rfc-draw
-        rfc-game)
+(include-relative "const")
+(include-relative "internal")
+(include-relative "draw")
+(include-relative "game")
+
+(import (chicken process-context))
+(import rfc-const rfc-internal
+        rfc-draw rfc-game)
 
 (define layout-arg 'numpad)
 
