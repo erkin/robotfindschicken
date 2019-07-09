@@ -1,7 +1,8 @@
 ;;;; Herein lie global variables and constants and record definitions
 
 (module rfc-const *
-  (import chicken scheme)
+  (import scheme)
+  (import (chicken base))
 
 ;;;; Global variables to be changed
 

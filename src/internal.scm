@@ -1,16 +1,20 @@
 ;;;; Herein lie internal procedures
 
 (module rfc-internal *
-  (import chicken scheme)
-  (import (only data-structures alist-ref))
-  (import (only extras fprintf random))
-  (require-extension (only srfi-13 string-take))
-  (use ncurses)
+  (import scheme
+          (chicken base)
+          (chicken format)
+          (chicken random))
+  (import srfi-13)
+  (import ncurses)
 
   (import rfc-const)
 
   
 ;;;; Preliminary procedures
+
+;;; CHICKEN 4 compatibility
+  (define random pseudo-random-integer)
 
 ;;; Run the procedure f n times
   (define (repeat f n)

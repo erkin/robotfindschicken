@@ -1,9 +1,9 @@
 ;;;; Herein lie ncurses drawing procedures
 
 (module rfc-draw *
-  (import chicken scheme)
-  (import (only data-structures compose intersperse))
-  (use ncurses)
+  (import scheme
+          (chicken base))
+  (import ncurses)
 
   (import rfc-const
           rfc-internal)

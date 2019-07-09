@@ -1,8 +1,8 @@
 PROJECT := rfc
 
-EGGS := ncurses
+EGGS := ncurses srfi-18
 
-CC := csc
+CC := chicken-csc
 AR := ar rc
 SHELL := bash
 
@@ -48,7 +48,7 @@ eggs:
 app: $(APP) app_clean
 
 app_build: $(BUILDDIR)/$(PROJECT)
-	mv $^/{$(PROJECT),libchicken.so.8,ncurses.so} $(PREFIX)/lib/
+	mv $^/{$(PROJECT),libchicken.so.11,ncurses.so} $(PREFIX)/lib/
 	strip $(PREFIX)/lib/*
 	rm -rf $^
 

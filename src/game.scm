@@ -1,9 +1,10 @@
 ;;;; Herein lie game mechanics
 
 (module rfc-game *
-  (import chicken scheme)
-  (require-extension (only srfi-18 thread-sleep!))
-  (use ncurses)
+  (import scheme
+          (chicken base))
+  (import srfi-18)
+  (import ncurses)
 
   (import rfc-const
           rfc-internal
@@ -148,28 +149,30 @@
     ;; Other keys don't result in a redraw.
     (if (moved? robot) (draw-robot robot))
 
-    ;; (case) does not evaluate values...
-    (select (getch)
-      ((#\q #\Q KEY_F0 KEY_EXIT KEY_CLOSE)
-       (quit-game "You couldn't find the Chicken. Sad!" 0))
-      (((layout-ref 'up-char) KEY_UP)
-       (move-robot v: 'up))
-      (((layout-ref 'up-right-char))
-       (move-robot v: 'up h: 'right))
-      (((layout-ref 'right-char) KEY_RIGHT)
-       (move-robot h: 'right))
-      (((layout-ref 'down-right-char))
-       (move-robot v: 'down h: 'right))
-      (((layout-ref 'down-char) KEY_DOWN)
-       (move-robot v: 'down))
-      (((layout-ref 'down-left-char))
-       (move-robot v: 'down h: 'left))
-      (((layout-ref 'left-char) KEY_LEFT)
-       (move-robot h: 'left))
-      (((layout-ref 'up-left-char))
-       (move-robot v: 'up h: 'left))
-      ((#\? KEY_HELP)
-       (rfc-splash)))
+    ;; CHICKEN 5 removes `select` and it's too late to go back to `case`
+    ;; and I'm too lazy to write a macro for it. I'm terribly sorry.
+    (let ((input (getch)))
+      (cond 
+       ((member input (list #\q #\Q KEY_F0 KEY_EXIT KEY_CLOSE))
+        (quit-game "You couldn't find the Chicken. Sad!" 0))
+       ((member input (list (layout-ref 'up-char) KEY_UP))
+        (move-robot v: 'up))
+       ((eq? input (layout-ref 'up-right-char))
+        (move-robot v: 'up h: 'right))
+       ((member input (list (layout-ref 'right-char) KEY_RIGHT))
+        (move-robot h: 'right))
+       ((eq? input (layout-ref 'down-right-char))
+        (move-robot v: 'down h: 'right))
+       ((member input (list (layout-ref 'down-char) KEY_DOWN))
+        (move-robot v: 'down))
+       ((eq? input (layout-ref 'down-left-char))
+        (move-robot v: 'down h: 'left))
+       ((member input (list (layout-ref 'left-char) KEY_LEFT))
+        (move-robot h: 'left))
+       ((eq? input (layout-ref 'up-left-char))
+        (move-robot v: 'up h: 'left))
+       ((member input (list #\? KEY_HELP))
+        (rfc-splash))))
 
     (rfc-loop))
 
