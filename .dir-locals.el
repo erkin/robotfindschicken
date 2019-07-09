@@ -4,7 +4,4 @@
  (scheme-mode .
               ((indent-tabs-mode . nil)
                (geiser-scheme-implementation . chicken)
-               (subdirs . t)))
- (makefile-mode .
-                ((indent-tabs-mode . t)
-                 (subdirs . t))))
+               (subdirs . t))))
