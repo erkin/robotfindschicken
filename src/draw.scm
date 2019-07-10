@@ -1,5 +1,8 @@
-;;;; Herein lie ncurses drawing procedures
+(declare (unit rfc-draw))
+(declare (uses rfc-const))
+(declare (uses rfc-internal))
 
+;;;; Herein lie ncurses drawing procedures
 (module rfc-draw *
   (import scheme
           (chicken base))
@@ -9,7 +12,6 @@
           rfc-internal)
 
 ;;;; Drawing procedures
-
 ;;; Write messages in the middle of the window
   (define (centre-message . messages)
     (define (centre-message-iter messages n) ; with doublespacing

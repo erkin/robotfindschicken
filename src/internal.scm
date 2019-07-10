@@ -1,5 +1,7 @@
-;;;; Herein lie internal procedures
+(declare (unit rfc-internal))
+(declare (uses rfc-const))
 
+;;;; Herein lie internal procedures
 (module rfc-internal *
   (import scheme
           (chicken base)
@@ -12,7 +14,6 @@
 
   
 ;;;; Preliminary procedures
-
 ;;; CHICKEN 4 compatibility
   (define random pseudo-random-integer)
 
@@ -26,7 +27,6 @@
 
 
 ;;;; Internal procedures
-
   (define (check-position return)
     (define (check-item-position items)
       (when (pair? items)
@@ -68,6 +68,7 @@
     (endwin)
     (unless (zero? code)
       (fprintf (current-error-port) message)
+      (newline)
       ;; Quit with an error.
       (exit code))
     (print message)

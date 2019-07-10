@@ -1,18 +1,17 @@
-;;;; Herein lie global variables and constants and record definitions
+(declare (unit rfc-const))
 
+;;;; Herein lie global variables and constants and record definitions
 (module rfc-const *
   (import scheme)
   (import (chicken base))
 
 ;;;; Global variables to be changed
-
   (define items '())
   (define item-count #f)
   (define robot #f)
   (define chicken #f)
 
 ;;; Default layout (numpad)
-
   (define layout
     '((up-char    . #\8)
       (down-char  . #\2)
@@ -25,7 +24,6 @@
   
 
 ;;;; Constant values
-
   (define *frame-colour*   1)
   (define *decor-colour*   2)
   (define *chicken-colour* 3)
@@ -49,7 +47,7 @@
       "A fork that once belonged to one of the dining philosophers."
       "A gift-wrapped set of straightedge and compasses."
       "A handheld electronic console 'Game of Life'. Glidey!"
-      "A picture of a woman wearing a hat with feathers. Compression artifacts distorted her face but it looks familiar."
+      "A picture of a woman wearing a hat with feathers. Compression artifacts distorted her face but she looks familiar."
       "A pocket sized copy of the Chine Nual. It's thicker than it's long."
       "A potted plant of dubious legality. It needs watering."
       "A semi-automatic, conservatory key system oboe."
@@ -94,7 +92,7 @@
       "You have no idea what it is, but you hope it's not what it looks like."
       "You tripped on a null modem lying around. Ouch!"
       "A spam postcard. It offers you to enlarge your mailbox."
-      "EICAR test file written on vellum in gothic script"
+      "EICAR test file written on vellum in gothic script."
       "A bowl of chicken nuggets. You start worrying that your quest is futile."
       "A BSD daemon picture in the ICO format. Quite iconoclastic."
       "Collector's edition of Robot Finds Chicken. Mint condition, unopened."
@@ -112,7 +110,7 @@
       "This is a faifthul catalogue of the Library of Babel."
       "The demonstration of the fallacy of the true catalogue of the Library of Babel."
       "A chicken decoy. It looked convincing from a distance."
-      "A fertilized egg. You can cheat by waiting for it to hatch if you are tired of searching."
+      "A fertilised egg. You can cheat by waiting for it to hatch if you are tired of searching."
       "You stepped on a tarball! Yuck!"))
 
   (define chars
@@ -122,7 +120,6 @@
       #\< #\> #\` #\~))
   
 ;;;; Record definitions
-
   (define-record item
     row col row-prev col-prev
     moved? message colour char)

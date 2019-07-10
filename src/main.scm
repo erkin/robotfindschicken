@@ -1,35 +1,37 @@
-(include-relative "const")
-(include-relative "internal")
-(include-relative "draw")
-(include-relative "game")
+(declare (uses rfc-const))
+(declare (uses rfc-draw))
+(declare (uses rfc-game))
 
 (import (chicken process-context))
-(import rfc-const rfc-internal
-        rfc-draw rfc-game)
+(import rfc-const rfc-draw rfc-game)
 
 (define layout-arg 'numpad)
 
 (define (rfc-usage)
-  (print "Usage: rfc [-n ITEMS]")
-  (print "  --help, -?, -h              Display this help message")
-  (print "  --items ITEMS, -n ITEMS     Play the game with ITEMS number of items")
-  (print "  --layout LAYOUT, -l LAYOUT  Switch keyboard layout to LAYOUT (default: numpad)")
-  (print "  --version, -v, -V           Display version and licence information")
-  (newline)
-  (print* "Available layouts are: ")
-  (print* "qwerty/qwertz/azerty, [numpad], dvorak/svorak, ")
-  (print "f, colemak, workman")
+  (print
+   (string-join
+    "Usage: rfc [-n ITEMS]"
+    "  --help, -?, -h              Display this help message"
+    "  --items ITEMS, -n ITEMS     Play the game with ITEMS number of items"
+    "  --layout LAYOUT, -l LAYOUT  Switch keyboard layout to LAYOUT (default: numpad)"
+    "  --version, -v, -V           Display version and licence information"
+    ""
+    "Available layouts are: qwerty/qwertz/azerty, [numpad], dvorak/svorak, f, colemak, workman"
+    "\n"))
   (exit))
 
 (define (rfc-version)
-  (print   "robotfindschicken v1.-1.420")
-  (print   "https://github.com/erkin/robotfindschicken")
-  (print   "Copyright (C) 2019 Erkin Batu Altunbaş")
-  (newline)
-  (print* "Each file of this project's source code is subject ")
-  (print  "to the terms of the Mozilla Public Licence v2.0")
-  (print* "If a copy of the MPL was not distributed with this file, ")
-  (print  "you can obtain one at https://mozilla.org/MPL/2.0/")
+  (print
+   (string-join
+    "robotfindschicken v1.-1.420"
+    "https://github.com/erkin/robotfindschicken"
+    "Copyright (C) 2019 Erkin Batu Altunbaş"
+    ""
+    "Each file of this project's source code is subject "
+    "to the terms of the Mozilla Public Licence v2.0"
+    "If a copy of the MPL was not distributed with this file, "
+    "you can obtain one at https://mozilla.org/MPL/2.0/"
+    "\n"))
   (exit))
 
 (define (main args)

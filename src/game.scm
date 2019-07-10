@@ -1,5 +1,9 @@
-;;;; Herein lie game mechanics
+(declare (unit rfc-game))
+(declare (uses rfc-const))
+(declare (uses rfc-internal))
+(declare (uses rfc-draw))
 
+;;;; Herein lie game mechanics
 (module rfc-game *
   (import scheme
           (chicken base))
@@ -12,7 +16,6 @@
 
 
 ;;;; Movement procedures
-
   (define (move-robot #!key (v 'nil) (h 'nil))
     ;; Erase the message line
     (mvprintw 1 2 (make-string (- (COLS) 3) #\ ))
@@ -54,7 +57,6 @@
 
 
 ;;;; Game sections
-
   (define (rfc-splash)
     (draw-frame)
     ;; The ordering is important to avoid overwriting
